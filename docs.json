@@ -70,6 +70,9 @@
             ]
           }
         ]
+      },
+      {
+        "tab": "Untitled Tab"
       }
     ],
     "global": {
@@ -78,11 +81,6 @@
           "anchor": "Documentation",
           "href": "https://mintlify.com/docs",
           "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
         }
       ]
     }
