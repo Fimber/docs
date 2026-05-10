@@ -1,81 +1,174 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
-icon: 'rocket'
+title: Getting Started
+sidebarTitle: Install and first commands
+description: Install ImageMagick on your platform and run your first image processing commands.
 ---
 
-## Get started in three steps
+New to ImageMagick? This page takes you from installation to your first working commands. If you already have it installed, skip to the [tutorial](/tutorials/build-image-processing-pipeline) or [how-to guides](/how-to/batch-resize-and-optimize).
 
-Get your documentation site running locally and make your first customization.
+## Install ImageMagick
 
-### Step 1: Set up your local environment
+<Tabs>
+  <Tab title="macOS">
+    Install with [Homebrew](https://brew.sh):
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    brew install imagemagick
+    ```
 
-### Step 2: Deploy your changes
+    Homebrew bundles ImageMagick with delegates for JPEG, PNG, WebP, TIFF, and other common formats. For Ghostscript font support, also run:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    ```bash
+    brew install ghostscript
+    ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    [MacPorts](https://www.macports.org/) (`sudo port install ImageMagick`) is an alternative if you prefer it.
+  </Tab>
+  <Tab title="Linux">
+    Download the official AppImage from the [releases page](https://github.com/ImageMagick/ImageMagick/releases). The AppImage is a self-contained binary that requires no installation:
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    wget https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage
+    chmod +x ImageMagick-7.1.2-21-gcc-x86_64.AppImage
+    sudo mv ImageMagick-7.1.2-21-gcc-x86_64.AppImage /usr/local/bin/magick
+    ```
 
-### Step 3: Go live
+    On Ubuntu 26.04 and later, the `imagemagick` package from `apt` may include version 7. Check with `magick --version` after installing. On Ubuntu 24.04 and earlier, `apt install imagemagick` installs version 6. Use the AppImage above to get version 7.
+  </Tab>
+  <Tab title="Windows">
+    Download the installer from the [ImageMagick releases page](https://imagemagick.org/script/download.php#windows). Choose the **Q16** variant (16 bits per channel) for most use cases.
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    Run the installer and check **"Add application directory to your system path"** when prompted. This lets you run `magick` from any command prompt or PowerShell window.
+  </Tab>
+  <Tab title="Docker">
+    The community-maintained [`dpokidov/imagemagick`](https://hub.docker.com/r/dpokidov/imagemagick) image provides ImageMagick 7 with broad format support. From their documentation:
 
-## Next steps
+    ```bash
+    docker run --rm -v "$(pwd)":/imgs dpokidov/imagemagick /imgs/photo.jpg -resize 800x600 /imgs/resized.jpg
+    ```
 
-Now that you have your docs running, explore these key features:
+    This mounts your current directory into the container, processes the image, and writes the output back to your filesystem. See the [Docker Hub page](https://hub.docker.com/r/dpokidov/imagemagick) for additional usage examples and available tags.
+  </Tab>
+</Tabs>
 
-<CardGroup cols={2}>
+## Verify the installation
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+Run:
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+```bash
+magick --version
+```
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+You should see the version number and a list of delegates (the image formats your build supports). The exact list varies by install method. A typical output looks like:
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+```
+Version: ImageMagick 7.1.2-21 Q16-HDRI x86_64
+Delegates (built-in): bzlib freetype jng jpeg png tiff webp xml zlib
+```
 
-</CardGroup>
+If a format you need is missing from your delegates list (like `webp` or `heic`), you may need to install additional libraries and rebuild, or switch to a different install method that includes broader delegate support.
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Convert between formats
+
+Convert a JPEG file to PNG:
+
+```bash
+magick photo.jpg photo.png
+```
+
+ImageMagick determines both input and output formats from the file extension. That single command decodes the JPEG, then re-encodes it as PNG.
+
+## Resize an image
+
+Shrink an image to fit within 800x600 pixels:
+
+```bash
+magick photo.jpg -resize 800x600 photo-small.jpg
+```
+
+The `-resize` operation preserves the original aspect ratio. A 1600x1200 input becomes 800x600. A 2000x1500 input becomes 800x600. A 1200x800 input becomes 800x533, because 800 is the limiting dimension at the 3:2 aspect ratio.
+
+<Tip>
+  Add `>` after the dimensions to skip images that are already small enough: `magick photo.jpg -resize 800x600\> photo-small.jpg`. Without the `>`, a 400x300 image would be enlarged to 800x600. With it, the image stays untouched.
+</Tip>
+
+## Inspect an image
+
+Use `magick identify` to check an image's format, dimensions, and file size without opening it:
+
+```bash
+magick identify photo.jpg
+```
+
+Output:
+
+```
+photo.jpg JPEG 1600x1200 1600x1200+0+0 8-bit sRGB 11536B 0.000u 0:00.000
+```
+
+Reading left to right: filename, format, dimensions, geometry, bit depth, colorspace, file size.
+
+For a cleaner view, use `-format` to pick the fields you want:
+
+```bash
+magick identify -format "Format: %m\nDimensions: %wx%h\nSize: %b\n" photo.jpg
+```
+
+Output:
+
+```
+Format: JPEG
+Dimensions: 1600x1200
+Size: 11536B
+```
+
+## Resize and compress in one command
+
+Operations are processed left to right. You can stack several in one command:
+
+```bash
+magick photo.jpg -resize 800x600 -quality 80 photo-web.jpg
+```
+
+This resizes the image, then writes it as a JPEG at quality level 80 (lower means smaller file, more compression artifacts).
+
+The order of **operators** matters. `-resize` followed by `-crop` produces a different result than `-crop` followed by `-resize`:
+
+```bash
+# Resize to 200x200, then crop the top-left 100x100
+magick input.png -resize 200x200 -crop 100x100+0+0 +repage resize-then-crop.png
+
+# Crop the top-left 100x100, then enlarge it to 200x200
+magick input.png -crop 100x100+0+0 +repage -resize 200x200 crop-then-resize.png
+```
+
+The first command shrinks the whole image, then extracts a piece. The second command extracts a piece first, then enlarges that piece. Different order, different output.
+
+<Info>
+  **Settings vs. operators.** ImageMagick flags fall into two categories. Operators like `-resize`, `-crop`, and `-rotate` transform the image immediately at the point they appear in the command. Settings like `-gravity` and `-quality` change persistent state that remains in effect for the rest of the command. `-gravity Center` affects all spatial operators that follow it until you reset it. `-quality 80` sets the compression level used when the output file is written, so its position relative to operators does not change the result.
+</Info>
+
+## Process multiple files at once
+
+Use `magick mogrify` to apply the same operation to every file matching a pattern:
+
+```bash
+magick mogrify -resize 400x300 *.jpg
+```
+
+<Warning>
+  `mogrify` overwrites the original files. To write resized copies to a different folder, create the folder first, then use `-path`:
+
+  ```bash
+  mkdir resized
+  magick mogrify -resize 400x300 -path resized *.jpg
+  ```
+</Warning>
+
+## Keep going
+
+You can now install, convert, resize, inspect, and batch-process images. Three paths forward depending on what you need:
+
+- **[Build an image processing pipeline](/tutorials/build-image-processing-pipeline)** walks you through combining resize, metadata stripping, watermarking, and format conversion into a reusable workflow.
+- **[Batch resize and optimize for web](/how-to/batch-resize-and-optimize)** covers real-world batch processing with quality control and file size constraints.
+- **[Geometry syntax reference](/reference/geometry)** explains every modifier (`>`, `<`, `!`, `^`, `#`) you can append to dimension strings.

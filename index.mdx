@@ -1,133 +1,61 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
-icon: 'star'
+title: ImageMagick Documentation
+sidebarTitle: What is ImageMagick
+description: Command-line tools and libraries for processing, converting, and editing images in 200+ formats.
 ---
 
-## Setting up
+ImageMagick is a free, open-source toolkit for manipulating images from the command line. You can convert between formats, resize in batch, composite images together, apply filters, add text, and automate complex image pipelines with shell scripts or any programming language.
 
-Get your documentation site up and running in minutes.
+It runs on Linux, macOS, and Windows. Most Linux distributions and Homebrew on macOS include it in their package managers.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+<Info>
+  This documentation covers **ImageMagick 7** (the `magick` command). If you are migrating from version 6, the main change is that standalone commands like `convert`, `mogrify`, and `identify` are now subcommands of `magick`. For example, `convert input.jpg output.png` becomes `magick input.jpg output.png`. See the [v6 to v7 porting guide](https://imagemagick.org/script/porting.php) for full details.
+</Info>
 
-## Make it yours
+## What you can build with it
 
-Design a docs site that looks great and empowers your users.
+**Automate image pipelines for the web.** Convert uploads to WebP/AVIF, generate thumbnails at multiple sizes, and optimize file size as part of a build step or server-side script.
 
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+**Batch-process photos without a GUI.** Resize entire folders with `mogrify` or a shell loop, strip EXIF metadata for privacy, apply consistent watermarks, or convert between color profiles across thousands of files.
+
+**Validate and constrain user uploads.** Enforce dimensions, reject unsupported formats, generate previews, and normalize images on servers that have no desktop environment.
+
+## Run your first command
+
+Convert a JPEG to PNG and resize it to fit within 800x600 pixels, preserving the aspect ratio:
+
+```bash
+magick photo.jpg -resize 800x600 photo.png
+```
+
+A 1200x800 input becomes 800x533. ImageMagick fits the image inside the target dimensions without distortion, then writes the result in the format implied by the output extension.
+
+Every command follows the same structure: **input**, then **operations** (left to right), then **output**.
+
+## Find what you need
+
+<CardGroup cols={2}>
+  <Card title="Install and run your first commands" icon="rocket" href="/getting-started">
+    Set up ImageMagick on your platform and verify it works in under five minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Build a reusable image pipeline" icon="graduation-cap" href="/tutorials/build-image-processing-pipeline">
+    Resize, strip metadata, watermark, and convert images step by step, combining them into a single automated workflow.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Batch resize and optimize for web" icon="images" href="/how-to/batch-resize-and-optimize">
+    Resize a folder of images with format conversion, quality control, and file size constraints.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Look up geometry syntax" icon="ruler-combined" href="/reference/geometry">
+    Understand what `800x600>`, `50%`, and `WxH!` do when you pass them to resize, crop, extent, and other spatial operations.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## Fix a problem
 
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={2}>
+  <Card title="Troubleshoot common errors" icon="wrench" href="/troubleshooting">
+    Missing delegates, authorization failures, cache limits, wrong colors, and platform-specific issues.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Ask the community" icon="comments" href="https://github.com/ImageMagick/ImageMagick/discussions">
+    Search past questions or post your own on GitHub Discussions.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
-
-## Make your content agent ready
-
-Make your docs work for humans and AI agents alike.
-
-<Columns cols={2}>
-  <Card
-    title="Prompt component"
-    icon="robot"
-    href="/agent-ready/prompt"
-  >
-    Embed shareable AI prompts readers can copy or open in Cursor.
-  </Card>
-  <Card
-    title="Visibility"
-    icon="eye"
-    href="/agent-ready/visibility"
-  >
-    Show different content to humans and agents reading your docs.
-  </Card>
-  <Card
-    title="Contextual menu"
-    icon="bolt"
-    href="/agent-ready/contextual"
-  >
-    Give readers one-click access to Claude, ChatGPT, Cursor, and more.
-  </Card>
-  <Card
-    title="AI coding tools"
-    icon="wand-magic-sparkles"
-    href="/ai-tools/claude-code"
-  >
-    Set up Claude Code, Cursor, or Windsurf with Mintlify's skill.
-  </Card>
-</Columns>
-
-## Need inspiration?
-
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+</CardGroup>
