@@ -42,7 +42,7 @@
           },
           {
             "group": "Help",
-            "pages": ["troubleshooting"]
+            "pages": ["troubleshooting", "development"]
           }
         ]
       }
