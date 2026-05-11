@@ -37,8 +37,8 @@
             "pages": ["how-to/batch-resize-and-optimize"]
           },
           {
-            "group": "Resize and crop syntax",
-            "pages": ["reference/geometry"]
+            "group": "Reference",
+            "pages": ["reference/geometry", "reference/common-options"]
           },
           {
             "group": "Help",

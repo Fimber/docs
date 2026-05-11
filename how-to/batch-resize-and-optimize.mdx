@@ -6,6 +6,8 @@ description: Resize a folder of images for web delivery with format conversion, 
 
 This guide covers batch-resizing images to a maximum width, converting to WebP or JPEG, and handling common edge cases like mixed orientations and already-small files.
 
+Unlike the [step-by-step pipeline tutorial](/tutorials/build-image-processing-pipeline), this guide focuses on **production batch concerns**: preserving **subdirectory layout**, enforcing **JPEG file-size ceilings**, and **resize modes** (width-only, height-only, exact crop, letterbox padding) beyond a single “fit in a box” recipe.
+
 ## Resize and convert a single image
 
 Constrain an image to a maximum width of 1200 pixels and output as WebP:

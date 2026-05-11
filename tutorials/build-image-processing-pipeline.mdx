@@ -133,7 +133,9 @@ ImageMagick picks the output format from the `.webp` extension. `-quality 85` is
 
 ## Step 5: Combine everything into one command
 
-Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. (In bash, `\` must be the **last** character on a line—inline `#` comments cannot sit after the backslash, so the table below maps each line to its job.)
+Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. In bash, `\` must be the **last** character on a line—do not put inline `#` comments after a continuation backslash.
+
+**Full pipeline (copy-paste):**
 
 ```bash
 magick originals/product1.jpg \
@@ -146,16 +148,34 @@ magick originals/product1.jpg \
   processed/product1.webp
 ```
 
-| # | Line | What it does |
-|---|------|----------------|
-| 1 | `magick originals/product1.jpg \` | Load the product JPEG. |
-| 2 | `-resize '800x800>' \` | Shrink to fit inside 800×800 without upscaling. |
-| 3 | `-strip \` | Remove metadata and color profiles. |
-| 4 | `watermark.png \` | Load the watermark as a second image. |
-| 5 | `-gravity SouthEast -geometry +20+20 \` | Anchor the overlay bottom-right with a 20px margin. |
-| 6 | `-composite \` | Flatten the watermark onto the main image. |
-| 7 | `-quality 85 \` | Set lossy quality for the WebP encoder. |
-| 8 | `processed/product1.webp` | Write the final WebP. |
+<Steps>
+  <Step title="Load the product JPEG">
+    The command starts with `magick originals/product1.jpg` and a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
+  </Step>
+  <Step title="Resize inside 800×800 without upscaling">
+    `-resize '800x800>'` shrinks large photos to fit inside the box while preserving aspect ratio; smaller sources are not enlarged.
+  </Step>
+  <Step title="Strip metadata and profiles">
+    `-strip` removes EXIF, comments, and color profiles you usually do not want on public web assets.
+  </Step>
+  <Step title="Load the watermark image">
+    `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the product photo.
+  </Step>
+  <Step title="Position the overlay">
+    `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
+  </Step>
+  <Step title="Flatten the watermark onto the product">
+    `-composite` merges the overlay with the base image using the current gravity and geometry.
+  </Step>
+  <Step title="Set WebP quality">
+    `-quality 85` sets lossy compression for the final write; tune up or down for your catalog's file-size budget.
+  </Step>
+  <Step title="Write the WebP deliverable">
+    `processed/product1.webp` is the output path; the `.webp` extension selects the encoder.
+  </Step>
+</Steps>
+
+See also the [common options reference](/reference/common-options) for deeper notes on these flags.
 
 Verify the result:
 
@@ -241,4 +261,4 @@ This tutorial covered six ImageMagick concepts through that same task:
 - **Format conversion with quality control** (`-quality 85 output.webp`) to compress images for web delivery.
 - **Operator chaining** to combine all five operations into a single command that processes an image in one pass.
 
-From here, the [batch resize and optimize guide](/how-to/batch-resize-and-optimize) covers additional constraints like file size ceilings and handling mixed input formats. The [resize and crop syntax reference](/reference/geometry) documents every resize modifier.
+From here, the [batch resize and optimize guide](/how-to/batch-resize-and-optimize) covers additional constraints like file size ceilings and handling mixed input formats. The [resize and crop syntax reference](/reference/geometry) documents every resize modifier, and the [common options reference](/reference/common-options) collects `-strip`, `-quality`, `-composite`, and related flags in one page.

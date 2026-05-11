@@ -178,20 +178,22 @@ The first command shrinks the whole image, then extracts a piece. The second com
 
 ## Process multiple files at once
 
+<Warning>
+  **`magick mogrify` overwrites matching inputs in place** unless you send outputs elsewhere with **`-path`** (and usually **`-format`**). Create the destination folder first, then run `mogrify`—or use a shell loop with explicit output paths if you want per-file control (see the [batch resize guide](/how-to/batch-resize-and-optimize)).
+</Warning>
+
 Use `magick mogrify` to apply the same operation to every file matching a pattern:
 
 ```bash
 magick mogrify -resize 400x300 *.jpg
 ```
 
-<Warning>
-  `mogrify` overwrites the original files. To write resized copies to a different folder, create the folder first, then use `-path`:
+Safe pattern (writes into `resized/` instead of overwriting sources):
 
-  ```bash
-  mkdir resized
-  magick mogrify -resize 400x300 -path resized *.jpg
-  ```
-</Warning>
+```bash
+mkdir resized
+magick mogrify -resize 400x300 -path resized *.jpg
+```
 
 ## Keep going
 
@@ -200,4 +202,5 @@ You can now install, convert, resize, inspect, and batch-process images. Paths f
 - **[Build an image processing pipeline](/tutorials/build-image-processing-pipeline)** walks you through combining resize, metadata stripping, watermarking, and format conversion into a reusable workflow.
 - **[Batch resize and optimize for web](/how-to/batch-resize-and-optimize)** covers real-world batch processing with quality control and file size constraints.
 - **[Resize and crop syntax reference](/reference/geometry)** explains every modifier (`>`, `<`, `!`, `^`, `#`) you can append to dimension strings.
+- **[Common options reference](/reference/common-options)** documents `-strip`, `-quality`, `-auto-orient`, `-gravity`, `-background`, and `-composite` in one place.
 - **[Troubleshooting](/troubleshooting)** if install or first commands fail (`magick` not found, missing delegates, policy errors, or shell escaping around `>` in geometry).

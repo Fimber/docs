@@ -1,0 +1,97 @@
+---
+title: Common Options Reference
+sidebarTitle: Common options
+description: Syntax and typical values for -strip, -quality, -auto-orient, -gravity, -background, and -composite used across resize and batch workflows.
+---
+
+These options appear throughout the [quickstart](/quickstart), [tutorial](/tutorials/build-image-processing-pipeline), and [batch how-to](/how-to/batch-resize-and-optimize). Dimension strings (`800x600>`, `50%`, …) are covered in the [resize and crop syntax reference](/reference/geometry).
+
+## `-strip` {#strip}
+
+**Role:** Operator — removes profiles, comments, and other metadata blobs from the **current image** at the point it appears in the command line.
+
+**Syntax:** `-strip` (no arguments).
+
+**Typical use:** Web delivery and privacy (strip EXIF GPS, device names, ICC profiles you do not intend to ship).
+
+**Example:**
+
+```bash
+magick photo.jpg -strip web.jpg
+```
+
+## `-quality` {#quality}
+
+**Role:** Setting — sets **lossy** compression for the **next** JPEG, WebP, or similar write, until you change it again. Does not apply the same numeric scale to every format the same way; treat values as tunable defaults.
+
+**Syntax:** `-quality` *integer* (commonly **1–100**; higher is usually better fidelity and larger files for JPEG and WebP).
+
+**Typical use:** Balance file size vs. artifacts after `-resize` and before the output filename.
+
+**Example:**
+
+```bash
+magick photo.jpg -resize '1200x>' -quality 85 output.webp
+```
+
+## `-auto-orient` {#auto-orient}
+
+**Role:** Operator — reads EXIF orientation, **physically** rotates pixels to upright, and normalizes orientation metadata so downstream `-resize` uses correct width/height.
+
+**Syntax:** `-auto-orient` (no arguments).
+
+**Typical use:** Phone photos before any geometry that assumes “width” is the long edge of the displayed picture.
+
+**Example:**
+
+```bash
+magick upload.jpg -auto-orient -resize '800x800>' -quality 85 upload.webp
+```
+
+Place it **immediately after the input** (or right after reading the first image in a stack) so every later operator sees the corrected pixels.
+
+## `-gravity` {#gravity}
+
+**Role:** Setting — chooses an **anchor** for placement operators (`-crop`, `-extent`, `-composite`, `-annotate`, …) until you change or clear it.
+
+**Syntax:** `-gravity` *name*
+
+**Common values:** `NorthWest` (default), `North`, `NorthEast`, `West`, `Center`, `East`, `SouthWest`, `South`, `SouthEast`. For text overlays you may also see directional hints like `North` for “top-centered.”
+
+**Example (crop from center):**
+
+```bash
+magick wide.jpg -gravity center -crop 800x600+0+0 +repage crop.jpg
+```
+
+Reset unusual gravity with `-gravity None` when you need the default origin again.
+
+## `-background` {#background}
+
+**Role:** Setting — defines the color used when an operator **creates** new pixels (letterboxing, `-extent`, flattened alpha, etc.).
+
+**Syntax:** `-background` *color*
+
+**Values:** Named colors (`white`, `black`, `none` for transparent), `#RRGGBB`, `#RRGGBBAA`, or expressions like `srgb(255,255,255)` depending on build.
+
+**Example (pad to square with white bars):**
+
+```bash
+magick photo.jpg -resize '800x800>' -gravity center -background white -extent 800x800 tile.jpg
+```
+
+## `-composite` {#composite}
+
+**Role:** Operator — merges the **current image stack** (typically a base image plus one overlay loaded just before this token). Often paired with `-gravity` and `-geometry` for margins.
+
+**Syntax:** `-composite` (no arguments). With multiple pairs of overlays, ImageMagick composites in order; see the [official composite docs](https://imagemagick.org/script/command-line-options.php#composite) for advanced forms.
+
+**Typical pattern:** `magick base.ext overlay.ext -gravity SouthEast -geometry +20+20 -composite out.ext`
+
+**Example:**
+
+```bash
+magick product.jpg watermark.png -gravity SouthEast -geometry +20+20 -composite listed.jpg
+```
+
+Here `product.jpg` is the bottom layer, `watermark.png` is stacked on top, and `-composite` flattens them using the given gravity and offset.

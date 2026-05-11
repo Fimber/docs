@@ -8,8 +8,8 @@ description: Solutions for common ImageMagick errors and unexpected output.
 
 Run a few commands **before** you dig into a specific error—they show version, delegates, policies, and what ImageMagick thinks about your file.
 
-<Tabs>
-  <Tab title="Linux / macOS">
+<AccordionGroup>
+  <Accordion title="Linux / macOS (bash)">
     ```bash
     # Version + built-in delegates (formats this binary can handle)
     magick --version
@@ -29,8 +29,8 @@ Run a few commands **before** you dig into a specific error—they show version,
     # True container type from bytes (optional)
     file path/to/your.jpg
     ```
-  </Tab>
-  <Tab title="Windows (PowerShell)">
+  </Accordion>
+  <Accordion title="Windows (PowerShell)">
     ```powershell
     magick --version
 
@@ -44,8 +44,8 @@ Run a few commands **before** you dig into a specific error—they show version,
     ```
 
     There is no built-in `file` command; `magick identify` already reports the detected format.
-  </Tab>
-</Tabs>
+  </Accordion>
+</AccordionGroup>
 
 ## Fix error messages
 
@@ -411,4 +411,4 @@ Run a few commands **before** you dig into a specific error—they show version,
   </Accordion>
 </AccordionGroup>
 
-If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), or [resize and crop syntax reference](/reference/geometry). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).
+If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), [resize and crop syntax reference](/reference/geometry), or [common options reference](/reference/common-options). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).

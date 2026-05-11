@@ -63,15 +63,7 @@ magick identify -verbose upload.png | Select-String -Pattern 'Geometry|Format'
 
 ## Run your first command
 
-Convert a JPEG to PNG and resize it to fit inside 800×600 pixels, preserving aspect ratio:
-
-```bash
-magick photo.jpg -resize 800x600 photo.png
-```
-
-A 1200×800 input becomes 800×533. ImageMagick fits the image inside the target box without distortion, then picks the output format from the file extension.
-
-Every command follows the same structure: **input**, then **operations** (left to right), then **output**.
+Hands-on install, verification, and your first convert/resize commands belong in **[Getting started](/quickstart)** so this page stays an overview. There you will install ImageMagick, confirm **ImageMagick 7** with `magick --version`, and walk through resize and format conversion with full examples.
 
 ## Find what you need
 
@@ -87,6 +79,9 @@ Every command follows the same structure: **input**, then **operations** (left t
   </Card>
   <Card title="Need the resize/crop language?" icon="ruler-combined" href="/reference/geometry">
     Look up what `800x600>`, `50%`, `WxH!`, `^`, and offsets mean for `-resize`, `-crop`, and `-extent`.
+  </Card>
+  <Card title="Need common flags?" icon="sliders" href="/reference/common-options">
+    Quick reference for `-strip`, `-quality`, `-auto-orient`, `-gravity`, `-background`, and `-composite` with one example each.
   </Card>
 </CardGroup>
 

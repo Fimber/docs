@@ -1,0 +1,8 @@
+/*
+  Mintlify injects a Documentation Index blockquote (linking to llms.txt) on every page.
+  Keep it on the homepage only; footer still links to /llms.txt for tools.
+  Selector uses :has() so we only hide blockquotes that link to llms.txt.
+*/
+html:not([data-current-path="/"]) blockquote:has(a[href*="llms.txt"]) {
+  display: none !important;
+}
