@@ -13,7 +13,7 @@ By the end, you will have a batch script that processes an entire folder of phot
 </Info>
 
 <Warning>
-  **Shell:** Steps 1–5 use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). Line continuations use `\` at the end of each line—**PowerShell treats `\` differently**, so either paste each command as **one long line** (remove the backslashes and extra newlines) or use **Step 6** for a PowerShell-native loop.
+  **Shell:** The first five numbered steps below use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). Line continuations use `\` at the end of each line—**PowerShell treats `\` differently**, so either paste each command as **one long line** (remove the backslashes and extra newlines) or use **Step 6** for a PowerShell-native loop.
 </Warning>
 
 ## Set up your working directory
@@ -43,7 +43,8 @@ magick identify originals/*.jpg
 
 Real product photos from different cameras and photographers arrive at different sizes. This pipeline standardizes them.
 
-## Step 1: Resize to consistent dimensions
+<Steps>
+  <Step title="Step 1: Resize to consistent dimensions">
 
 E-commerce platforms typically need images at a fixed maximum size. Resize a single image to fit within 800x800 pixels:
 
@@ -62,7 +63,8 @@ The third column **`800x600`** confirms your 2400×1800 source was shrunk to fit
 
 The [Geometry syntax reference](/reference/geometry) covers every modifier in detail.
 
-## Step 2: Strip metadata
+  </Step>
+  <Step title="Step 2: Strip metadata">
 
 Photos from cameras and phones carry metadata that can include GPS coordinates, device info, and timestamps. For a public storefront, strip it:
 
@@ -73,7 +75,8 @@ magick identify step-stripped.jpg
 
 You should still see the same **geometry** as the source (e.g. `800x600` after the earlier resize). Metadata is gone from the file; use `magick identify -verbose step-stripped.jpg | head` if you want to confirm profile/EXIF fields disappeared.
 
-## Step 3: Add a watermark
+  </Step>
+  <Step title="Step 3: Add a watermark">
 
 Watermarking has two parts: creating the watermark image and compositing it onto the product photo.
 
@@ -114,7 +117,8 @@ step-watermarked.jpg JPEG 800x600 800x600+0+0 8-bit sRGB …
 
 The `-gravity SouthEast -geometry +20+20` places the watermark 20 pixels from the bottom-right edges.
 
-## Step 4: Convert to WebP
+  </Step>
+  <Step title="Step 4: Convert to WebP">
 
 WebP produces smaller files than JPEG at comparable visual quality. Convert an image and set the compression level:
 
@@ -131,7 +135,8 @@ preview.webp WEBP 2400x1800 2400x1800+0+0 8-bit sRGB …
 
 ImageMagick determines the output format from the `.webp` extension. The **`-quality`** value controls lossy compression for that write; see [-quality](/reference/common-options#quality) for how to choose numbers across JPEG and WebP.
 
-## Step 5: Combine everything into one command
+  </Step>
+  <Step title="Step 5: Combine everything into one command">
 
 Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. In bash, `\` must be the **last** character on a line—do not put inline `#` comments after a continuation backslash.
 
@@ -148,32 +153,16 @@ magick originals/input.jpg \
   processed/input.webp
 ```
 
-<Steps>
-  <Step title="Load the input JPEG">
-    The command starts with `magick originals/input.jpg` and a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
-  </Step>
-  <Step title="Resize inside 800×800 without upscaling">
-    `-resize '800x800>'` is an **operator** (it runs at this point in the pipeline): it shrinks large photos to fit inside the box while preserving aspect ratio, and it does not upscale smaller sources.
-  </Step>
-  <Step title="Strip metadata and profiles">
-    `-strip` is an **operator** — it removes EXIF, comments, and color profiles you usually do not want on public web assets, applied as soon as it is reached.
-  </Step>
-  <Step title="Load the watermark image">
-    `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the base photo.
-  </Step>
-  <Step title="Position the overlay">
-    `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
-  </Step>
-  <Step title="Flatten the watermark onto the base image">
-    `-composite` is an **operator**: it merges the overlay with the base image using the current gravity and geometry at this point in the command.
-  </Step>
-  <Step title="Set WebP quality">
-    `-quality 85` is a **setting** for the next lossy write: it sets WebP compression for the output file (this repo uses **85** as a shared default in examples; tune as needed—see [-quality](/reference/common-options#quality)).
-  </Step>
-  <Step title="Write the WebP deliverable">
-    `processed/input.webp` is the output path; ImageMagick determines the encoder from the `.webp` extension.
-  </Step>
-</Steps>
+**Walk the combined command (read in order):**
+
+1. **Load** — `magick originals/input.jpg` with a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
+2. **Resize (operator)** — `-resize '800x800>'` runs here: it shrinks large photos to fit inside the box while preserving aspect ratio, and it does not upscale smaller sources.
+3. **Strip (operator)** — `-strip` removes EXIF, comments, and color profiles you usually do not want on public web assets, applied as soon as it is reached.
+4. **Second input** — `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the base photo.
+5. **Position** — `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
+6. **Composite (operator)** — `-composite` merges the overlay with the base image using the current gravity and geometry at this point in the command.
+7. **Quality (setting)** — `-quality 85` sets WebP compression for the next lossy write (this repo uses **85** as a shared default in examples; tune as needed—see [-quality](/reference/common-options#quality)).
+8. **Write** — `processed/input.webp` is the output path; ImageMagick determines the encoder from the `.webp` extension.
 
 See also the [common options reference](/reference/common-options) for deeper notes on these flags.
 
@@ -191,7 +180,8 @@ processed/input.webp WEBP 800x600 800x600+0+0 8-bit sRGB …
 
 The **WEBP** token and **`800x600`** (or your aspect-correct size) confirm the pipeline wrote a WebP at the expected dimensions. One command turns a raw product photo into a web-ready, watermarked, metadata-free WebP.
 
-## Step 6: Batch-process a folder
+  </Step>
+  <Step title="Step 6: Batch-process a folder">
 
 Wrap the pipeline in a loop to process every image in the `originals/` folder:
 
@@ -237,6 +227,9 @@ magick identify processed/*.webp
 ```
 
 Each output image fits within 800x800, has no metadata, carries a watermark, and is compressed as WebP.
+
+  </Step>
+</Steps>
 
 ## Clean up
 

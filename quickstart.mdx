@@ -63,7 +63,8 @@ New to ImageMagick? This page takes you from installation to your first working 
   </Tab>
 </Tabs>
 
-## Verify the installation
+<Steps>
+  <Step title="Verify the installation">
 
 Run:
 
@@ -100,7 +101,8 @@ You should see at least one line with `WEBP` and read/write flags (`rw*` or `r--
   **Operators vs. settings (read this once).** Flags fall into two groups. **Operators** (`-resize`, `-crop`, `-rotate`, …) transform the image **at the point they appear** in the command line. **Settings** (`-gravity`, `-quality`, …) change **state for the rest of the command** until you override them—for example `-gravity Center` affects every later spatial operator, and `-quality 80` sets the JPEG/WebP compression used when the output file is written (moving `-quality` earlier vs. later in the command usually does not change the result).
 </Info>
 
-## Convert between formats
+  </Step>
+  <Step title="Convert between formats">
 
 Convert a JPEG file to PNG:
 
@@ -110,7 +112,8 @@ magick input.jpg output.png
 
 ImageMagick determines both input and output formats from the file extension. That single command decodes the JPEG, then re-encodes it as PNG.
 
-## Resize an image
+  </Step>
+  <Step title="Resize an image">
 
 Shrink an image to fit within 800x600 pixels:
 
@@ -124,7 +127,8 @@ The `-resize` operation preserves the original aspect ratio. A 1600x1200 input b
   Add `>` after the dimensions to skip images that are already small enough: `magick input.jpg -resize 800x600\> output-small.jpg`. Without the `>`, a 400x300 image would be enlarged to 800x600. With it, the image stays untouched.
 </Tip>
 
-## Inspect an image
+  </Step>
+  <Step title="Inspect an image">
 
 Use `magick identify` to check an image's format, dimensions, and file size without opening it:
 
@@ -154,7 +158,8 @@ Dimensions: 1600x1200
 Size: 11536B
 ```
 
-## Resize and compress in one command
+  </Step>
+  <Step title="Resize and compress in one command">
 
 Operations are processed left to right. You can stack several in one command:
 
@@ -176,7 +181,8 @@ magick input.png -crop 100x100+0+0 +repage -resize 200x200 crop-then-resize.png
 
 The first command shrinks the whole image, then extracts a piece. The second command extracts a piece first, then enlarges that piece. Different order, different output.
 
-## Process multiple files at once
+  </Step>
+  <Step title="Process multiple files at once">
 
 <Warning>
   **`magick mogrify` overwrites matching inputs in place** unless you send outputs elsewhere with **`-path`** (and usually **`-format`**). Create the destination folder first, then run `mogrify`—or use a shell loop with explicit output paths if you want per-file control (see the [batch resize guide](/how-to/batch-resize-and-optimize)).
@@ -194,6 +200,9 @@ Safe pattern (writes into `resized/` instead of overwriting sources):
 mkdir resized
 magick mogrify -resize 400x300 -path resized *.jpg
 ```
+
+  </Step>
+</Steps>
 
 ## Keep going
 
