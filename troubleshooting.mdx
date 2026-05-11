@@ -6,7 +6,7 @@ description: Solutions for common ImageMagick errors and unexpected output.
 
 ## Run these first (diagnostics)
 
-Run a few commands **before** you dig into a specific error—they show version, delegates, policies, and what ImageMagick thinks about your file.
+Run a few commands **before** you dig into a specific error; they show version, delegates, policies, and what ImageMagick thinks about your file.
 
 <AccordionGroup>
   <Accordion title="Linux / macOS (bash)">
@@ -57,7 +57,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     magick: unable to open image 'input.jpg': No such file or directory
     ```
 
-    **Cause:** ImageMagick cannot read the path you passed—wrong **working directory**, a **typo**, or a path that contains **spaces** without quoting.
+    **Cause:** ImageMagick cannot read the path you passed: wrong **working directory**, a **typo**, or a path that contains **spaces** without quoting.
 
     **Fix:**
 
@@ -175,7 +175,7 @@ Run a few commands **before** you dig into a specific error—they show version,
       </Tab>
     </Tabs>
 
-    ImageMagick may load **several** policy files (system, user, delegates). Paths differ between the Windows installer, Homebrew, Debian packages, and Docker images—use the output above on **your** machine.
+    ImageMagick may load **several** policy files (system, user, delegates). Paths differ between the Windows installer, Homebrew, Debian packages, and Docker images; use the output above on **your** machine.
 
     Update the resource values:
 
@@ -198,7 +198,7 @@ Run a few commands **before** you dig into a specific error—they show version,
       **Do not relax policy for untrusted files.** Changing `rights="none"` to `read|write` lets ImageMagick decode vectors and PostScript that can be malicious. Only do this on machines that **never** process uploads or downloads you do not fully trust, and keep ImageMagick and Ghostscript patched.
     </Warning>
 
-    **Fix — step 1:** See which policy files ImageMagick actually loaded (paths differ by OS and packager):
+    **Fix (step 1):** See which policy files ImageMagick actually loaded (paths differ by OS and packager):
 
     <Tabs>
       <Tab title="Linux / macOS">
@@ -213,7 +213,7 @@ Run a few commands **before** you dig into a specific error—they show version,
       </Tab>
     </Tabs>
 
-    **Fix — step 2:** Open the file that contains the `<policy domain="coder" … pattern="PDF" />` line (often named `policy.xml`). Typical locations—**always confirm with the output above**:
+    **Fix (step 2):** Open the file that contains the `<policy domain="coder" … pattern="PDF" />` line (often named `policy.xml`). Typical locations (**always confirm with the output above**):
 
     | Install | Where to look |
     |---------|----------------|
@@ -221,7 +221,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     | **Ubuntu / Debian (`apt`)** | `/etc/ImageMagick-7/policy.xml` or `/etc/ImageMagick-6/policy.xml` (depends on package). `sudo find /etc -name policy.xml 2>/dev/null` lists candidates. |
     | **Windows installer** | Under the ImageMagick program folder, e.g. `C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\policy.xml` (folder name matches your version). |
 
-    **Fix — step 3:** Find the restrictive line and change rights only if you accept the risk above:
+    **Fix (step 3):** Find the restrictive line and change rights only if you accept the risk above:
 
     ```xml
     <policy domain="coder" rights="none" pattern="PDF" />
@@ -318,11 +318,11 @@ Run a few commands **before** you dig into a specific error—they show version,
   <Accordion title=".webp file looks wrong or viewers say it is JPEG">
     **Symptom:** You wrote `output.webp`, nothing errored, but the image looks like JPEG compression or tools report **JFIF** / **JPEG** inside the file.
 
-    **Cause:** Some builds lack a **WebP encode delegate**. ImageMagick may still write a file with a `.webp` extension while encoding with another codec—**the extension can lie**.
+    **Cause:** Some builds lack a **WebP encode delegate**. ImageMagick may still write a file with a `.webp` extension while encoding with another codec; **the extension can lie**.
 
     **Fix:**
 
-    - Run `magick --version` and read **Delegates (built-in):** — you should see `webp` if WebP encode is native to this binary.
+    - Run `magick --version` and read **Delegates (built-in):** you should see `webp` if WebP encode is native to this binary.
     - Run `magick identify -verbose output.webp | Select-String -Pattern 'format|mime'` (or `grep` on Linux/macOS). If the reported format is **JPEG** despite the `.webp` name, install a build with WebP support or write to **`output.jpg`** until you upgrade.
 
     ```bash

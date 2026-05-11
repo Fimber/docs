@@ -27,7 +27,7 @@ New to ImageMagick? This page takes you from installation to your first working 
   <Tab title="Linux">
     For a **known ImageMagick 7** CLI on Linux, use the **official AppImage** from [ImageMagick on GitHub Releases](https://github.com/ImageMagick/ImageMagick/releases).
 
-    **Fast path (Intel/AMD x86_64):** run this as-is when the asset still exists. If `wget` returns **404**, the release was rotated—use the “Any CPU / any 7.x release” steps below.
+    **Fast path (Intel/AMD x86_64):** run this as-is when the asset still exists. If `wget` returns **404**, the release was rotated; use the “Any CPU / any 7.x release” steps below.
 
     ```bash
     wget -O magick-appimage "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage"
@@ -36,7 +36,7 @@ New to ImageMagick? This page takes you from installation to your first working 
     magick --version
     ```
 
-    **Any CPU / any 7.x release:** open the [releases page](https://github.com/ImageMagick/ImageMagick/releases), pick a **7.x** release, expand **Assets**, find the `.AppImage` for your architecture (`ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 build on ARM). Copy its URL (in most browsers: **right-click the file name → Copy link address**). Paste that URL into the quotes in the next command—nothing else in the line should be edited.
+    **Any CPU / any 7.x release:** open the [releases page](https://github.com/ImageMagick/ImageMagick/releases), pick a **7.x** release, expand **Assets**, find the `.AppImage` for your architecture (`ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 build on ARM). Copy its URL (in most browsers: **right-click the file name → Copy link address**). Paste that URL into the quotes in the next command. Nothing else in the line should be edited.
 
     ```bash
     wget -O magick-appimage "PUT_THE_GITHUB_ASSET_URL_YOU_COPIED_HERE"
@@ -86,7 +86,7 @@ Delegates (built-in): bzlib freetype jng jpeg png tiff webp xml zlib
 
 **How to read it**
 
-- **Delegates (built-in):** space-separated names (`jpeg`, `png`, `webp`, `tiff`, …) tell you which formats this build can handle without extra plug-ins. If the format you need never appears here, this binary cannot decode/encode it—you need a different install (another AppImage, Homebrew build, Docker image, or a custom compile with the right libraries).
+- **Delegates (built-in):** space-separated names (`jpeg`, `png`, `webp`, `tiff`, …) tell you which formats this build can handle without extra plug-ins. If the format you need never appears here, this binary cannot decode/encode it; you need a different install (another AppImage, Homebrew build, Docker image, or a custom compile with the right libraries).
 - If **`webp`** (or **HEIC**, **AVIF**, etc.) is missing but you need it, switch to a fuller build or follow your OS packager’s docs to add libraries and reinstall ImageMagick.
 
 Spot-check a single format:
@@ -98,7 +98,7 @@ magick -list format | grep -i webp
 You should see at least one line with `WEBP` and read/write flags (`rw*` or `r--` for read-only). On Windows PowerShell, use `magick -list format | Select-String -Pattern webp`.
 
 <Info>
-  **Operators vs. settings (read this once).** Flags fall into two groups. **Operators** (`-resize`, `-crop`, `-rotate`, …) transform the image **at the point they appear** in the command line. **Settings** (`-gravity`, `-quality`, …) change **state for the rest of the command** until you override them—for example `-gravity Center` affects every later spatial operator, and `-quality 80` sets the JPEG/WebP compression used when the output file is written (moving `-quality` earlier vs. later in the command usually does not change the result).
+  **Operators vs. settings (read this once).** Flags fall into two groups. **Operators** (`-resize`, `-crop`, `-rotate`, …) transform the image **at the point they appear** in the command line. **Settings** (`-gravity`, `-quality`, …) change **state for the rest of the command** until you override them; for example `-gravity Center` affects every later spatial operator, and `-quality 80` sets the JPEG/WebP compression used when the output file is written (moving `-quality` earlier vs. later in the command usually does not change the result).
 </Info>
 
   </Step>
@@ -185,7 +185,7 @@ The first command shrinks the whole image, then extracts a piece. The second com
   <Step title="Process multiple files at once">
 
 <Warning>
-  **`magick mogrify` overwrites matching inputs in place** unless you send outputs elsewhere with **`-path`** (and usually **`-format`**). Create the destination folder first, then run `mogrify`—or use a shell loop with explicit output paths if you want per-file control (see the [batch resize guide](/how-to/batch-resize-and-optimize)).
+  **`magick mogrify` overwrites matching inputs in place** unless you send outputs elsewhere with **`-path`** (and usually **`-format`**). Create the destination folder first, then run `mogrify`, or use a shell loop with explicit output paths if you want per-file control (see the [batch resize guide](/how-to/batch-resize-and-optimize)).
 </Warning>
 
 Use `magick mogrify` to apply the same operation to every file matching a pattern:

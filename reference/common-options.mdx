@@ -8,7 +8,7 @@ These options appear throughout the [quickstart](/quickstart), [tutorial](/tutor
 
 ## `-strip` {#strip}
 
-**Role:** Operator — removes profiles, comments, and other metadata blobs from the **current image** at the point it appears in the command line.
+**Role:** Operator. Removes profiles, comments, and other metadata blobs from the **current image** at the point it appears in the command line.
 
 **Syntax:** `-strip` (no arguments).
 
@@ -22,7 +22,7 @@ magick input.jpg -strip output.jpg
 
 ## `-quality` {#quality}
 
-**Role:** Setting — sets **lossy** compression for the **next** JPEG, WebP, or similar write, until you change it again. Does not apply the same numeric scale to every format the same way; treat values as tunable defaults.
+**Role:** Setting. Sets **lossy** compression for the **next** JPEG, WebP, or similar write, until you change it again. Does not apply the same numeric scale to every format the same way; treat values as tunable defaults.
 
 **Syntax:** `-quality` *integer* (commonly **1–100**; higher is usually better fidelity and larger files for JPEG and WebP).
 
@@ -38,7 +38,7 @@ magick input.jpg -resize '1200x>' -quality 85 output.webp
 
 ## `-auto-orient` {#auto-orient}
 
-**Role:** Operator — reads EXIF orientation, **physically** rotates pixels to upright, and normalizes orientation metadata so downstream `-resize` uses correct width/height.
+**Role:** Operator. Reads EXIF orientation, **physically** rotates pixels to upright, and normalizes orientation metadata so downstream `-resize` uses correct width/height.
 
 **Syntax:** `-auto-orient` (no arguments).
 
@@ -54,7 +54,7 @@ Place it **immediately after the input** (or right after reading the first image
 
 ## `-gravity` {#gravity}
 
-**Role:** Setting — chooses an **anchor** for placement operators (`-crop`, `-extent`, `-composite`, `-annotate`, …) until you change or clear it.
+**Role:** Setting. Chooses an **anchor** for placement operators (`-crop`, `-extent`, `-composite`, `-annotate`, …) until you change or clear it.
 
 **Syntax:** `-gravity` *name*
 
@@ -70,7 +70,7 @@ Reset unusual gravity with `-gravity None` when you need the default origin agai
 
 ## `-background` {#background}
 
-**Role:** Setting — defines the color used when an operator **creates** new pixels (letterboxing, `-extent`, flattened alpha, etc.).
+**Role:** Setting. Defines the color used when an operator **creates** new pixels (letterboxing, `-extent`, flattened alpha, etc.).
 
 **Syntax:** `-background` *color*
 
@@ -84,7 +84,7 @@ magick input.jpg -resize '800x800>' -gravity center -background white -extent 80
 
 ## `-composite` {#composite}
 
-**Role:** Operator — merges the **current image stack** (typically a base image plus one overlay loaded just before this token). Often paired with `-gravity` and `-geometry` for margins.
+**Role:** Operator. Merges the **current image stack** (typically a base image plus one overlay loaded just before this token). Often paired with `-gravity` and `-geometry` for margins.
 
 **Syntax:** `-composite` (no arguments). With multiple pairs of overlays, ImageMagick composites in order; see the [official composite docs](https://imagemagick.org/script/command-line-options.php#composite) for advanced forms.
 

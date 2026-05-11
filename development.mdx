@@ -67,7 +67,7 @@ mint broken-links
 
 ## Documentation Index / llms.txt callout (Mintlify)
 
-If the **live site** shows a blockquote such as “Documentation Index” or “Fetch the complete documentation index at … `/llms.txt`” on every page, that UI is produced by **Mintlify’s hosted shell**, not by MDX in this repository. Toggle or report that behavior in the [Mintlify dashboard](https://dashboard.mintlify.com) for your deployment (AI / ingestion or support) if you want it hidden—there is often no repo-local switch for that banner.
+If the **live site** shows a blockquote such as “Documentation Index” or “Fetch the complete documentation index at … `/llms.txt`” on every page, that UI is produced by **Mintlify’s hosted shell**, not by MDX in this repository. Toggle or report that behavior in the [Mintlify dashboard](https://dashboard.mintlify.com) for your deployment (AI / ingestion or support) if you want it hidden; there is often no repo-local switch for that banner.
 
 This project still exposes the machine-readable index at **`/llms.txt`** (and `/.well-known/llms.txt`) and links it from the **site footer** under Tools. Root-level **`style.css`** hides the Mintlify “Documentation Index” blockquote everywhere via `blockquote:has(a[href*="llms.txt"])` so the promo does not compete with article content; MDX blockquotes without an `llms.txt` link are unchanged. The heading **`## Snippet verification (CI) {#snippet-verification-ci}`** in this file is the stable anchor for `/development#snippet-verification-ci`.
 

@@ -98,7 +98,7 @@ The loop mirrors the source tree under `web/`: for example, `photos/shoes/boot1.
 
 ## When one file fails mid-batch
 
-`magick mogrify` applies the same operation to every path in the glob. If **one** input is corrupt or unreadable, **mogrify can exit and leave the rest untouched** (behavior depends on version and delegates—always read the terminal message).
+`magick mogrify` applies the same operation to every path in the glob. If **one** input is corrupt or unreadable, **mogrify can exit and leave the rest untouched** (behavior depends on version and delegates; always read the terminal message).
 
 When you need per-file control, a loop can log failures and continue with the remaining paths:
 
@@ -115,7 +115,7 @@ for f in photos/*.jpg; do
 done
 ```
 
-If you intentionally want “best effort” without branching, append `|| true` after `magick` so a failed file does not abort the shell script—use this only when silently skipping failures is acceptable:
+If you intentionally want “best effort” without branching, append `|| true` after `magick` so a failed file does not abort the shell script. Use this only when silently skipping failures is acceptable:
 
 ```bash
 magick "$f" -resize '1200x>' -quality 85 "web/${base}.webp" || true
@@ -125,7 +125,7 @@ Inspect the exit status of the whole script with `$?` after the loop if you wrap
 
 ## Fix rotated phone photos
 
-Add **`-auto-orient`** (an **operator** — runs at its position in the command) before any resize operation to correct rotation flags from phone cameras. Pair it with **`-quality`** (a **setting** — applies to the next lossy write) as you already do elsewhere in this guide:
+Add **`-auto-orient`** (an **operator** that runs at its position in the command) before any resize operation to correct rotation flags from phone cameras. Pair it with **`-quality`** (a **setting** that applies to the next lossy write) as you already do elsewhere in this guide:
 
 ```bash
 magick input.jpg -auto-orient -resize '1200x>' -quality 85 output.webp
@@ -171,7 +171,7 @@ The output height is at most 800 pixels, and width scales to keep the aspect rat
 
 ### Exact dimensions with center crop
 
-Use this when the **destination must be an exact pixel size** (for example a **1200×800 hero slot**) and **cropping** edges is acceptable. Tall or wide sources are scaled until the box is filled, then overflow is cut off—ideal when the layout fixes width and height and you do not want letterboxing.
+Use this when the **destination must be an exact pixel size** (for example a **1200×800 hero slot**) and **cropping** edges is acceptable. Tall or wide sources are scaled until the box is filled, then overflow is cut off. That is ideal when the layout fixes width and height and you do not want letterboxing.
 
 Fill the target dimensions and crop overflow from the center:
 
@@ -183,7 +183,7 @@ The output is exactly 1200x800, cropped from the center. See [Geometry syntax re
 
 ### Fit within a box with padding
 
-Use this when the platform needs a **square (or fixed) canvas** but **must not crop** the subject—e.g. marketplace tiles that show the full product with **letterboxing** instead of cutting off limbs or labels. The image is scaled to fit inside the box, then the canvas is padded to the exact size with a background color.
+Use this when the platform needs a **square (or fixed) canvas** but **must not crop** the subject (for example marketplace tiles that show the full product with **letterboxing** instead of cutting off limbs or labels). The image is scaled to fit inside the box, then the canvas is padded to the exact size with a background color.
 
 Resize to fit inside 800x800, then pad the remaining space with a background color:
 

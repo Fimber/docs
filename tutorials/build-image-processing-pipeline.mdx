@@ -13,7 +13,7 @@ By the end, you will have a batch script that processes an entire folder of phot
 </Info>
 
 <Warning>
-  **Shell:** The first five numbered steps below use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). Line continuations use `\` at the end of each line—**PowerShell treats `\` differently**, so either paste each command as **one long line** (remove the backslashes and extra newlines) or use **Step 6** for a PowerShell-native loop.
+  **Shell:** The first five numbered steps below use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). Line continuations use `\` at the end of each line; **PowerShell treats `\` differently**, so either paste each command as **one long line** (remove the backslashes and extra newlines) or use **Step 6** for a PowerShell-native loop.
 </Warning>
 
 ## Set up your working directory
@@ -138,7 +138,7 @@ ImageMagick determines the output format from the `.webp` extension. The **`-qua
   </Step>
   <Step title="Step 5: Combine everything into one command">
 
-Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. In bash, `\` must be the **last** character on a line—do not put inline `#` comments after a continuation backslash.
+Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. In bash, `\` must be the **last** character on a line; do not put inline `#` comments after a continuation backslash.
 
 **Full pipeline (copy-paste):**
 
@@ -155,14 +155,14 @@ magick originals/input.jpg \
 
 **Walk the combined command (read in order):**
 
-1. **Load** — `magick originals/input.jpg` with a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
-2. **Resize (operator)** — `-resize '800x800>'` runs here: it shrinks large photos to fit inside the box while preserving aspect ratio, and it does not upscale smaller sources.
-3. **Strip (operator)** — `-strip` removes EXIF, comments, and color profiles you usually do not want on public web assets, applied as soon as it is reached.
-4. **Second input** — `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the base photo.
-5. **Position** — `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
-6. **Composite (operator)** — `-composite` merges the overlay with the base image using the current gravity and geometry at this point in the command.
-7. **Quality (setting)** — `-quality 85` sets WebP compression for the next lossy write (this repo uses **85** as a shared default in examples; tune as needed—see [-quality](/reference/common-options#quality)).
-8. **Write** — `processed/input.webp` is the output path; ImageMagick determines the encoder from the `.webp` extension.
+1. **Load:** `magick originals/input.jpg` with a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
+2. **Resize (operator):** `-resize '800x800>'` runs here: it shrinks large photos to fit inside the box while preserving aspect ratio, and it does not upscale smaller sources.
+3. **Strip (operator):** `-strip` removes EXIF, comments, and color profiles you usually do not want on public web assets, applied as soon as it is reached.
+4. **Second input:** `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the base photo.
+5. **Position:** `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
+6. **Composite (operator):** `-composite` merges the overlay with the base image using the current gravity and geometry at this point in the command.
+7. **Quality (setting):** `-quality 85` sets WebP compression for the next lossy write (this repo uses **85** as a shared default in examples; tune as needed; see [-quality](/reference/common-options#quality)).
+8. **Write:** `processed/input.webp` is the output path; ImageMagick determines the encoder from the `.webp` extension.
 
 See also the [common options reference](/reference/common-options) for deeper notes on these flags.
 

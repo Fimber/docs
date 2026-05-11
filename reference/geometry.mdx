@@ -4,7 +4,7 @@ sidebarTitle: Geometry Syntax Reference
 description: How dimension strings like `800x600>`, `50%`, and `WxH!` control resize, crop, extent, and other spatial operations.
 ---
 
-Geometry is a string format that specifies dimensions, offsets, and resize behavior. It appears in `-resize`, `-crop`, `-extent`, `-thumbnail`, `-scale`, `-sample`, and other options that manipulate image dimensions. The authoritative overview is [Command-line processing — geometry](https://imagemagick.org/script/command-line-processing.php#geometry) on imagemagick.org; this page summarizes the parts doc readers use most often.
+Geometry is a string format that specifies dimensions, offsets, and resize behavior. It appears in `-resize`, `-crop`, `-extent`, `-thumbnail`, `-scale`, `-sample`, and other options that manipulate image dimensions. The authoritative overview is [Command-line processing (geometry)](https://imagemagick.org/script/command-line-processing.php#geometry) on imagemagick.org; this page summarizes the parts doc readers use most often.
 
 ## Base syntax
 
@@ -12,11 +12,11 @@ Unless noted, examples assume a **1600×1200** source (4∶3 aspect ratio). For 
 
 | Format | Meaning | Example (1600×1200 source) |
 |--------|---------|----------------------------|
-| `WxH` | Fit inside **W×H**, keep aspect ratio (scale = min of width/height ratios) | `800x400` → **533×400** — height binds first because `400÷1200` is a smaller scale than `800÷1600`; **not** 800×600 (height would exceed 400). |
+| `WxH` | Fit inside **W×H**, keep aspect ratio (scale = min of width/height ratios) | `800x400` → **533×400**; height binds first because `400÷1200` is a smaller scale than `800÷1600`; **not** 800×600 (height would exceed 400). |
 | `W` | Set width **W**, height follows aspect ratio | `800` → **800×600** |
 | `xH` | Set height **H**, width follows aspect ratio | `x600` → **800×600** |
 | `W%` | Scale **both** width and height by the same percentage | `50%` → **800×600** |
-| `W%xH%` | Scale width and height **independently** (aspect ratio usually changes) | `50%x25%` → **800×300** (half width, quarter height—common mistake is expecting 50% on both axes; use plain `50%` for uniform shrink). |
+| `W%xH%` | Scale width and height **independently** (aspect ratio usually changes) | `50%x25%` → **800×300** (half width, quarter height. A common mistake is expecting 50% on both axes; use plain `50%` for uniform shrink). |
 | `WxH+X+Y` | Width×height plus offset (typical with `-crop`) | `400x300+100+50` → 400×300 region with top-left of the crop at **pixel (100, 50)** |
 | `A@` | Resize to approximate total pixel area **A** | `640000@` → **924×693** (area ≈ 640,332) |
 
@@ -30,7 +30,7 @@ Modifier flags are appended to the end of a geometry string. They change how Ima
 
 ### Independent percentages on both axes (`W%xH%`)
 
-Strings like **`50%x25%`** scale width and height **by different percentages**, so the aspect ratio **changes** (unlike a single `50%`, which scales both axes together). See the **`W%xH%`** row in the [base syntax](#base-syntax) table—this trips people who expect `50%x25%` to mean “50% overall.”
+Strings like **`50%x25%`** scale width and height **by different percentages**, so the aspect ratio **changes** (unlike a single `50%`, which scales both axes together). See the **`W%xH%`** row in the [base syntax](#base-syntax) table. That trips people who expect `50%x25%` to mean “50% overall.”
 
 All examples below use a **1600x1200** input image and a target of **800x400**.
 
@@ -86,7 +86,7 @@ Resizes the image only if it is smaller than the target. Larger images stay unch
 magick input.jpg -resize '800x400^' output.jpg
 ```
 
-**`^` means “cover” the box**, not “fit inside.” ImageMagick scales until **both** dimensions are at least the target (`max(W/w, H/h)`). For 1600×1200 into an **800×400** box, the width hits 800 first, producing **800×600**—the image is **150px taller than the 400px target**. That overflow is expected; you still need a **crop** or **extent** step if the deliverable must be exactly 800×400.
+**`^` means “cover” the box**, not “fit inside.” ImageMagick scales until **both** dimensions are at least the target (`max(W/w, H/h)`). For 1600×1200 into an **800×400** box, the width hits 800 first, producing **800×600**. The image is **150px taller than the 400px target**. That overflow is expected; you still need a **crop** or **extent** step if the deliverable must be exactly 800×400.
 
 This is typically paired with `-gravity center -extent` (or `-crop`) to trim the extra:
 
@@ -121,10 +121,10 @@ When `-gravity` is set, crop offsets are measured from the gravity anchor point 
 | Gravity | Anchor for `+X+Y` (on an **800×800** image, 0-based pixels) | `-crop 400x400+0+0` result |
 |---------|------------------------------------------------------------------|---------------------------|
 | `NorthWest` (default) | Top-left corner **(0, 0)** | Top-left 400×400 block |
-| `NorthEast` | Top-right corner **(799, 0)** — column `width−1`, row `0` | Top-right 400×400 block |
-| `Center` | Image center **(400, 400)** — half of 800 in each axis | Centered 400×400 |
-| `SouthEast` | Bottom-right **(799, 799)** — column and row `size−1` | Bottom-right 400×400 block |
-| `South` | Bottom edge center **(400, 799)** — middle column, bottom row | Bottom-centered 400×400 strip |
+| `NorthEast` | Top-right corner **(799, 0)**; column `width−1`, row `0` | Top-right 400×400 block |
+| `Center` | Image center **(400, 400)**; half of 800 in each axis | Centered 400×400 |
+| `SouthEast` | Bottom-right **(799, 799)**; column and row `size−1` | Bottom-right 400×400 block |
+| `South` | Bottom edge center **(400, 799)**; middle column, bottom row | Bottom-centered 400×400 strip |
 
 Offsets add to the anchor in the direction ImageMagick defines for that gravity (see the [official geometry](https://imagemagick.org/script/command-line-processing.php#geometry) page for edge cases).
 
@@ -145,7 +145,7 @@ The first crop uses Center gravity. The second crop uses the default top-left or
 | `-resize` | High-quality resize with filtering | Default: best visual quality for photos and general output. |
 | `-thumbnail` | Same geometry as `-resize`, plus **strips metadata and profiles** | Web assets and thumbnails where smaller files and privacy matter. |
 | `-scale` | Fast resize **without** resize filters (pixel averaging) | Speed over quality; large downscales where a softer `-resize` is unnecessary. |
-| `-sample` | **Nearest-neighbor** only (no interpolation) | Pixel art, crisp UI captures, masks—avoid on photos (stair‑edges / aliasing). |
+| `-sample` | **Nearest-neighbor** only (no interpolation) | Pixel art, crisp UI captures, masks; avoid on photos (stair‑edges / aliasing). |
 
 **Crop and extent operations** (use `WxH+X+Y` offset syntax):
 
