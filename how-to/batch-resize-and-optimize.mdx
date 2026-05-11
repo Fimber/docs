@@ -16,7 +16,7 @@ Constrain an image to a maximum width of 1200 pixels and output as WebP:
 magick input.jpg -resize '1200x>' -quality 85 output.webp
 ```
 
-The **`1200x>`** geometry means “width at most 1200, never upscale”; see [resize and crop syntax](/reference/geometry) for the full modifier table. The **`-quality`** number is documented under [-quality](/reference/common-options#quality); examples in this guide use **85** as a shared web default so commands stay consistent with the rest of the site.
+The **`1200x>`** geometry means “width at most 1200, never upscale”; see [Geometry syntax reference](/reference/geometry) for the full modifier table. The **`-quality`** number is documented under [-quality](/reference/common-options#quality); examples in this guide use **85** as a shared web default so commands stay consistent with the rest of the site.
 
 ## Batch a flat folder with a loop
 
@@ -125,7 +125,7 @@ Inspect the exit status of the whole script with `$?` after the loop if you wrap
 
 ## Fix rotated phone photos
 
-Add `-auto-orient` before any resize operation to correct rotation flags from phone cameras:
+Add **`-auto-orient`** (an **operator** — runs at its position in the command) before any resize operation to correct rotation flags from phone cameras. Pair it with **`-quality`** (a **setting** — applies to the next lossy write) as you already do elsewhere in this guide:
 
 ```bash
 magick input.jpg -auto-orient -resize '1200x>' -quality 85 output.webp
@@ -179,7 +179,7 @@ Fill the target dimensions and crop overflow from the center:
 magick input.jpg -resize '1200x800^' -gravity center -extent 1200x800 output.jpg
 ```
 
-The output is exactly 1200x800, cropped from the center. See [resize and crop syntax](/reference/geometry) for how `^` differs from other resize modifiers.
+The output is exactly 1200x800, cropped from the center. See [Geometry syntax reference](/reference/geometry) for how `^` differs from other resize modifiers.
 
 ### Fit within a box with padding
 
@@ -196,7 +196,6 @@ A 4000x3000 landscape becomes an 800x800 image with the photo centered and white
 ## Next steps
 
 - Walk through a full resize → strip → watermark → WebP flow in the [image processing pipeline tutorial](/tutorials/build-image-processing-pipeline).
-- Look up modifiers such as `>`, `^`, and `!` in the [resize and crop syntax reference](/reference/geometry).
+- Look up modifiers such as `>`, `^`, and `!` in the [Geometry syntax reference](/reference/geometry).
 - Read flag-level details in the [common options reference](/reference/common-options).
 - If commands fail or output looks wrong, use [Troubleshooting](/troubleshooting).
-- If you edit this documentation repo, shell snippets in MDX are checked in CI; see [Snippet verification (CI)](/development#snippet-verification-ci).

@@ -1,12 +1,8 @@
 /*
-  Mintlify injects a Documentation Index blockquote (linking to llms.txt) on every page.
-  Keep it on the homepage only; footer still links to /llms.txt for tools.
-  Uses :has() so normal MDX blockquotes without an llms link stay visible.
-  Multiple anchors: the promo can sit under different layout wrappers by theme/version.
+  Mintlify injects a Documentation Index blockquote (linking to llms.txt).
+  Hide it everywhere; /llms.txt remains linked from the site footer under Tools.
+  Uses :has() so MDX blockquotes that do not link to llms.txt stay visible.
 */
-html:not([data-current-path="/"]) blockquote:has(a[href*="llms.txt"]),
-html:not([data-current-path="/"]) #content-area blockquote:has(a[href*="llms.txt"]),
-html:not([data-current-path="/"]) #content blockquote:has(a[href*="llms.txt"]),
-html:not([data-current-path="/"]) mdx-content blockquote:has(a[href*="llms.txt"]) {
+blockquote:has(a[href*="llms.txt"]) {
   display: none !important;
 }

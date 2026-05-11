@@ -60,7 +60,7 @@ step-resized.jpg JPEG 800x600 800x600+0+0 8-bit sRGB 2.34567e+04B 0.000u 0:00.00
 
 The third column **`800x600`** confirms your 2400×1800 source was shrunk to fit inside 800×800 (aspect ratio preserved). The resize step uses a trailing greater-than on the geometry so ImageMagick only shrinks: fit inside 800×800, keep aspect ratio, and never upscale a small source. Try the same resize on the other two images to see how portrait and square inputs behave.
 
-The [resize and crop syntax reference](/reference/geometry) covers every modifier in detail.
+The [Geometry syntax reference](/reference/geometry) covers every modifier in detail.
 
 ## Step 2: Strip metadata
 
@@ -129,7 +129,7 @@ Example (this step reads the **original** full-size JPEG, so dimensions stay lar
 preview.webp WEBP 2400x1800 2400x1800+0+0 8-bit sRGB …
 ```
 
-ImageMagick picks the output format from the `.webp` extension. The **`-quality`** value controls lossy compression for that write; see [-quality](/reference/common-options#quality) for how to choose numbers across JPEG and WebP.
+ImageMagick determines the output format from the `.webp` extension. The **`-quality`** value controls lossy compression for that write; see [-quality](/reference/common-options#quality) for how to choose numbers across JPEG and WebP.
 
 ## Step 5: Combine everything into one command
 
@@ -153,10 +153,10 @@ magick originals/input.jpg \
     The command starts with `magick originals/input.jpg` and a line continuation (backslash as the last character on the line) so the pipeline can span multiple lines.
   </Step>
   <Step title="Resize inside 800×800 without upscaling">
-    `-resize '800x800>'` shrinks large photos to fit inside the box while preserving aspect ratio; smaller sources are not enlarged.
+    `-resize '800x800>'` is an **operator** (it runs at this point in the pipeline): it shrinks large photos to fit inside the box while preserving aspect ratio, and it does not upscale smaller sources.
   </Step>
   <Step title="Strip metadata and profiles">
-    `-strip` removes EXIF, comments, and color profiles you usually do not want on public web assets.
+    `-strip` is an **operator** — it removes EXIF, comments, and color profiles you usually do not want on public web assets, applied as soon as it is reached.
   </Step>
   <Step title="Load the watermark image">
     `watermark.png` pushes a second image onto the stack so the next operators can composite it onto the base photo.
@@ -165,13 +165,13 @@ magick originals/input.jpg \
     `-gravity SouthEast -geometry +20+20` anchors the watermark **20px** from the bottom-right edges of the resized photo.
   </Step>
   <Step title="Flatten the watermark onto the base image">
-    `-composite` merges the overlay with the base image using the current gravity and geometry.
+    `-composite` is an **operator**: it merges the overlay with the base image using the current gravity and geometry at this point in the command.
   </Step>
   <Step title="Set WebP quality">
-    `-quality 85` sets lossy compression for the final write (this repo uses **85** as a shared web default in examples; adjust as needed—see [-quality](/reference/common-options#quality)).
+    `-quality 85` is a **setting** for the next lossy write: it sets WebP compression for the output file (this repo uses **85** as a shared default in examples; tune as needed—see [-quality](/reference/common-options#quality)).
   </Step>
   <Step title="Write the WebP deliverable">
-    `processed/input.webp` is the output path; the `.webp` extension selects the encoder.
+    `processed/input.webp` is the output path; ImageMagick determines the encoder from the `.webp` extension.
   </Step>
 </Steps>
 
@@ -248,17 +248,11 @@ rm -f step-resized.jpg step-stripped.jpg step-watermarked.jpg preview.webp
 
 Keep the `watermark.png`, `originals/`, and `processed/` folders. The watermark and the batch script are reusable for future product photo batches.
 
-## What you learned
+## Next steps
 
-In plain English: you took large, inconsistent JPEGs, shrank them to a shared maximum size, removed sensitive metadata, stamped a reusable watermark in the corner, and exported web-sized **WebP** files—first as separate commands, then as **one** `magick` invocation you can drop into a shell loop.
+This tutorial covered resizing with only-shrink geometry, stripping metadata with `-strip`, building a simple watermark with `xc:none` and `-annotate`, compositing with `-gravity` / `-geometry` / `-composite`, writing WebP with `-quality`, and chaining those pieces into one `magick` line. Here is where to go next:
 
-This tutorial covered six ImageMagick concepts through that same task:
-
-- **Resize with only-shrink geometry** (`-resize` plus `800x800>` in quotes) so large images fit inside 800×800 without upscaling smaller ones.
-- **Metadata stripping** (`-strip`) to remove EXIF data including GPS coordinates and camera info.
-- **Image creation** (`xc:none`, `-annotate`) to build a transparent watermark from scratch.
-- **Compositing** (`-composite`, `-gravity`, `-geometry`) to overlay one image on another at a specific position.
-- **Format conversion with quality control** (`-quality` before `.webp` / `.jpg` outputs) to compress images for web delivery—see [-quality](/reference/common-options#quality).
-- **Operator chaining** to combine all five operations into a single command that processes an image in one pass.
-
-From here, the [batch resize and optimize guide](/how-to/batch-resize-and-optimize) covers additional constraints like file size ceilings and handling mixed input formats. The [resize and crop syntax reference](/reference/geometry) documents every resize modifier, and the [common options reference](/reference/common-options) collects `-strip`, `-quality`, `-composite`, and related flags in one page.
+- [Batch resize and optimize for web](/how-to/batch-resize-and-optimize) for subdirectory trees, JPEG file-size ceilings, and more resize modes in production scripts.
+- [Geometry syntax reference](/reference/geometry) for every resize modifier on dimension strings.
+- [Common options reference](/reference/common-options) for `-strip`, `-quality`, `-composite`, and related flags in one place.
+- [Install and first commands](/quickstart) if you need to revisit operators vs. settings or installation checks.

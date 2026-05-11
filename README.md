@@ -44,7 +44,7 @@ View your local preview at `http://localhost:3000`.
 
 Install our GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app) to propagate changes from your repo to your deployment. Changes are deployed to production automatically after pushing to the default branch.
 
-If the **live site** does not match the files on the default branch (for example old Linux install text or nav labels), the Mintlify project is almost certainly pointed at a **different repository or branch** than the one you are editing. Fix that under your Mintlify site settings, then trigger a **redeploy**. Root **`style.css`** hides the Documentation Index blockquote on non-home pages; the index file **`/llms.txt`** is still linked from the footer for tools. You can also hide the banner from the Mintlify dashboard if your plan exposes that control.
+If the **live site** does not match the files on the default branch (for example old Linux install text or nav labels), the Mintlify project is almost certainly pointed at a **different repository or branch** than the one you are editing. Fix that under your Mintlify site settings, then trigger a **redeploy**. Root **`style.css`** hides the Documentation Index blockquote site-wide (any `blockquote` that links to `llms.txt`); **`/llms.txt`** is still linked from the footer for tools. You can also hide the banner from the Mintlify dashboard if your plan exposes that control.
 
 ## Need help?
 
