@@ -60,7 +60,7 @@ resized.jpg JPEG 800x600 800x600+0+0 8-bit sRGB 2.34567e+04B 0.000u 0:00.000
 
 The third column **`800x600`** confirms your 2400×1800 source was shrunk to fit inside 800×800 (aspect ratio preserved). The resize step uses a trailing greater-than on the geometry so ImageMagick only shrinks: fit inside 800×800, keep aspect ratio, and never upscale a small source. Try the same resize on the other two images to see how portrait and square inputs behave.
 
-The [geometry syntax reference](/reference/geometry) covers every modifier in detail.
+The [resize and crop syntax reference](/reference/geometry) covers every modifier in detail.
 
 ## Step 2: Strip metadata
 
@@ -241,4 +241,4 @@ This tutorial covered six ImageMagick concepts through that same task:
 - **Format conversion with quality control** (`-quality 85 output.webp`) to compress images for web delivery.
 - **Operator chaining** to combine all five operations into a single command that processes an image in one pass.
 
-From here, the [batch resize and optimize guide](/how-to/batch-resize-and-optimize) covers additional constraints like file size ceilings and handling mixed input formats. The [geometry syntax reference](/reference/geometry) documents every resize modifier.
+From here, the [batch resize and optimize guide](/how-to/batch-resize-and-optimize) covers additional constraints like file size ceilings and handling mixed input formats. The [resize and crop syntax reference](/reference/geometry) documents every resize modifier.

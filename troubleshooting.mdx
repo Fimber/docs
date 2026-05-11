@@ -9,7 +9,7 @@ description: Solutions for common ImageMagick errors and unexpected output.
 Run a few commands **before** you dig into a specific error—they show version, delegates, policies, and what ImageMagick thinks about your file.
 
 <Tabs>
-  <Tab title="Linux / macOS (bash)">
+  <Tab title="Linux / macOS">
     ```bash
     # Version + built-in delegates (formats this binary can handle)
     magick --version
@@ -47,7 +47,7 @@ Run a few commands **before** you dig into a specific error—they show version,
   </Tab>
 </Tabs>
 
-## Errors
+## Fix error messages
 
 <AccordionGroup>
   <Accordion title="unable to open image … No such file or directory">
@@ -270,7 +270,7 @@ Run a few commands **before** you dig into a specific error—they show version,
   </Accordion>
 </AccordionGroup>
 
-## Wrong output
+## Fix wrong-looking output
 
 <AccordionGroup>
   <Accordion title="Colors look wrong after conversion">
@@ -349,7 +349,7 @@ Run a few commands **before** you dig into a specific error—they show version,
   </Accordion>
 </AccordionGroup>
 
-## Platform-specific issues
+## Fix platform-specific problems
 
 <AccordionGroup>
   <Accordion title="Shell interprets >, <, ^, or ! in geometry strings">
@@ -358,7 +358,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     **Fix:**
 
     <Tabs>
-      <Tab title="Linux / macOS (bash)">
+      <Tab title="Linux / macOS">
         Wrap geometry strings in single quotes:
 
         ```bash
@@ -411,4 +411,4 @@ Run a few commands **before** you dig into a specific error—they show version,
   </Accordion>
 </AccordionGroup>
 
-If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), or [geometry reference](/reference/geometry). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).
+If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), or [resize and crop syntax reference](/reference/geometry). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).

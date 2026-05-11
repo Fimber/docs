@@ -25,9 +25,20 @@ New to ImageMagick? This page takes you from installation to your first working 
     [MacPorts](https://www.macports.org/) (`sudo port install ImageMagick`) is an alternative if you prefer it.
   </Tab>
   <Tab title="Linux">
-    For a **known ImageMagick 7** CLI on Linux, use the **official AppImage** from [ImageMagick on GitHub Releases](https://github.com/ImageMagick/ImageMagick/releases). Open the release you want, expand **Assets**, and pick the file for your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 AppImage on ARM).
+    For a **known ImageMagick 7** CLI on Linux, use the **official AppImage** from [ImageMagick on GitHub Releases](https://github.com/ImageMagick/ImageMagick/releases).
 
-    **Working example (replace when this version ages out):** the URL below points at a real asset; when you upgrade, copy the new **Download** URL from GitHub for that asset—filenames change every release.
+    Go to the releases page, open the **7.x** release you want, expand **Assets**, and copy the URL of the `.AppImage` that matches your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 AppImage on ARM). In most browsers you can **right-click the asset name → Copy link**.
+
+    Then install it (replace the quoted URL with the one you copied):
+
+    ```bash
+    wget -O magick-appimage "PASTE_THE_COPIED_URL_HERE"
+    chmod +x magick-appimage
+    sudo mv magick-appimage /usr/local/bin/magick
+    magick --version
+    ```
+
+    **Pinned example (Intel/AMD x86_64):** this URL was valid at publish time; if `wget` returns **404**, the file was renamed—use the copy-link steps above on the [releases page](https://github.com/ImageMagick/ImageMagick/releases).
 
     ```bash
     wget -O magick-appimage "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage"
@@ -35,8 +46,6 @@ New to ImageMagick? This page takes you from installation to your first working 
     sudo mv magick-appimage /usr/local/bin/magick
     magick --version
     ```
-
-    Always confirm the asset still exists on the [releases page](https://github.com/ImageMagick/ImageMagick/releases); if `wget` returns 404, pick the current `ImageMagick-*-gcc-x86_64.AppImage` link from the latest **7.x** release.
 
     Distribution packages (`apt install imagemagick`, and similar) often install **version 6** or ship **7** without the delegates you expect. Treat the AppImage (or the [official Linux download page](https://imagemagick.org/script/download.php#linux)) as the path to a predictable **v7** `magick` binary.
   </Tab>
@@ -46,7 +55,7 @@ New to ImageMagick? This page takes you from installation to your first working 
     Run the installer and check **"Add application directory to your system path"** when prompted. This lets you run `magick` from any command prompt or PowerShell window.
   </Tab>
   <Tab title="Docker">
-    The community-maintained [`dpokidov/imagemagick`](https://hub.docker.com/r/dpokidov/imagemagick) image provides ImageMagick 7 with broad format support. From their documentation:
+    ImageMagick does not publish an official Docker image. The community-maintained [`dpokidov/imagemagick`](https://hub.docker.com/r/dpokidov/imagemagick) image provides ImageMagick 7 with broad format support and is widely used. From their documentation:
 
     ```bash
     docker run --rm -v "$(pwd)":/imgs dpokidov/imagemagick /imgs/photo.jpg -resize 800x600 /imgs/resized.jpg
@@ -192,5 +201,5 @@ You can now install, convert, resize, inspect, and batch-process images. Paths f
 
 - **[Build an image processing pipeline](/tutorials/build-image-processing-pipeline)** walks you through combining resize, metadata stripping, watermarking, and format conversion into a reusable workflow.
 - **[Batch resize and optimize for web](/how-to/batch-resize-and-optimize)** covers real-world batch processing with quality control and file size constraints.
-- **[Geometry syntax reference](/reference/geometry)** explains every modifier (`>`, `<`, `!`, `^`, `#`) you can append to dimension strings.
+- **[Resize and crop syntax reference](/reference/geometry)** explains every modifier (`>`, `<`, `!`, `^`, `#`) you can append to dimension strings.
 - **[Troubleshooting](/troubleshooting)** if install or first commands fail (`magick` not found, missing delegates, policy errors, or shell escaping around `>` in geometry).

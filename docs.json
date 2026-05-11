@@ -3,6 +3,9 @@
   "name": "ImageMagick Documentation",
   "description": "ImageMagick is a scriptable image engine — run it in a terminal, call it from any language, or drop it into a CI pipeline. Convert, resize, composite, and filter images without a GUI, on any OS.",
   "theme": "mint",
+  "contextual": {
+    "options": []
+  },
   "colors": {
     "primary": "#1a56db",
     "light": "#3b82f6",
@@ -37,7 +40,7 @@
             "pages": ["how-to/batch-resize-and-optimize"]
           },
           {
-            "group": "Reference",
+            "group": "Resize and crop syntax",
             "pages": ["reference/geometry"]
           },
           {
@@ -64,6 +67,17 @@
   "footer": {
     "socials": {
       "github": "https://github.com/ImageMagick/ImageMagick"
-    }
+    },
+    "links": [
+      {
+        "header": "Tools",
+        "items": [
+          {
+            "label": "Documentation index (llms.txt)",
+            "href": "/llms.txt"
+          }
+        ]
+      }
+    ]
   }
 }
