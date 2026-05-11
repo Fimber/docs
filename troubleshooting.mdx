@@ -240,7 +240,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     **Error:**
 
     ```
-    magick: insufficient image data in file 'photo.jpg'
+    magick: insufficient image data in file 'input.jpg'
     magick: improper image header 'photo.bmp'
     ```
 
@@ -249,13 +249,13 @@ Run a few commands **before** you dig into a specific error—they show version,
     **Fix:** Verify the file with `identify`:
 
     ```bash
-    magick identify photo.jpg
+    magick identify input.jpg
     ```
 
     If `identify` also fails, the file is damaged. Check whether the file extension matches the actual format:
 
     ```bash
-    file photo.jpg
+    file input.jpg
     ```
 
     The `file` command (Linux/macOS) reads the file header and reports the real format regardless of the extension. On Windows, use `magick identify` instead, which reports the detected format in its output.
@@ -263,7 +263,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     If the format doesn't match the extension, rename the file or convert it explicitly:
 
     ```bash
-    magick PNG:photo.jpg output.jpg
+    magick PNG:input.jpg output.jpg
     ```
 
     The `PNG:` prefix forces ImageMagick to read the file as PNG regardless of the `.jpg` extension.
@@ -341,7 +341,7 @@ Run a few commands **before** you dig into a specific error—they show version,
     magick input.jpg -quality 85 output.jpg
     ```
 
-    For JPEG output, `-quality 85` is a reasonable default. For WebP, `-quality 85` also works. Lower values produce smaller files. For JPEG, you can also set a file size ceiling:
+    The numeric scale depends on the output format; see [-quality](/reference/common-options#quality) for how to read and tune it. Lower values usually mean smaller files and more visible compression. For JPEG, you can also set a file size ceiling:
 
     ```bash
     magick input.jpg -define jpeg:extent=200KB output.jpg

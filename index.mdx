@@ -35,7 +35,7 @@ Each example is a single command you can copy; paths are placeholders.
 ### Square thumbnails from mixed aspect ratios
 
 ```bash
-magick photo.jpg -resize 200x200^ -gravity center -extent 200x200 thumb.jpg
+magick input.jpg -resize 200x200^ -gravity center -extent 200x200 thumb.jpg
 ```
 
 `-resize 200x200^` fills at least 200×200, then `-extent` crops to an exact square from the center.
@@ -47,7 +47,7 @@ mkdir -p web
 magick mogrify -path web -format webp -quality 85 *.jpg
 ```
 
-Writes WebP files into `web/` next to each JPEG basename. For subfolders, mixed formats, and `-auto-orient`, see the [batch resize guide](/how-to/batch-resize-and-optimize).
+Writes WebP files into `web/` next to each JPEG basename. The numeric **`-quality`** value is explained under [-quality](/reference/common-options#quality) on the common options page. For subfolders, mixed formats, and `-auto-orient`, see the [batch resize guide](/how-to/batch-resize-and-optimize).
 
 ### Quick checks on an upload before you trust it
 
@@ -67,7 +67,7 @@ Hands-on install, verification, and your first convert/resize commands belong in
 
 ## Find what you need
 
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card title="Setting up for the first time?" icon="rocket" href="/quickstart">
     Install ImageMagick on your OS, confirm `magick --version`, and run your first convert/resize commands in under five minutes.
   </Card>
@@ -77,11 +77,16 @@ Hands-on install, verification, and your first convert/resize commands belong in
   <Card title="Building a multi-step pipeline?" icon="graduation-cap" href="/tutorials/build-image-processing-pipeline">
     Chain resize, metadata stripping, watermarking, and format conversion into one reusable command and loop.
   </Card>
-  <Card title="Need the resize/crop language?" icon="ruler-combined" href="/reference/geometry">
-    Look up what `800x600>`, `50%`, `WxH!`, `^`, and offsets mean for `-resize`, `-crop`, and `-extent`.
+</CardGroup>
+
+## Look up syntax and flags
+
+<CardGroup cols={2}>
+  <Card title="Resize and crop syntax reference" icon="ruler-combined" href="/reference/geometry">
+    Dimension strings for `-resize`, `-crop`, and `-extent`: `800x600>`, `50%`, `WxH!`, `^`, offsets, and modifier flags.
   </Card>
-  <Card title="Need common flags?" icon="sliders" href="/reference/common-options">
-    Quick reference for `-strip`, `-quality`, `-auto-orient`, `-gravity`, `-background`, and `-composite` with one example each.
+  <Card title="Common options reference" icon="sliders" href="/reference/common-options">
+    `-strip`, `-quality`, `-auto-orient`, `-gravity`, `-background`, and `-composite` with syntax, typical values, and one example each.
   </Card>
 </CardGroup>
 

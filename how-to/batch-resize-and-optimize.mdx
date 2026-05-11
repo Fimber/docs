@@ -16,11 +16,11 @@ Constrain an image to a maximum width of 1200 pixels and output as WebP:
 magick input.jpg -resize '1200x>' -quality 85 output.webp
 ```
 
-See [resize and crop syntax](/reference/geometry) for a full breakdown of the `1200x>` format.
+The **`1200x>`** geometry means “width at most 1200, never upscale”; see [resize and crop syntax](/reference/geometry) for the full modifier table. The **`-quality`** number is documented under [-quality](/reference/common-options#quality); examples in this guide use **85** as a shared web default so commands stay consistent with the rest of the site.
 
 ## Batch a flat folder with a loop
 
-An explicit **`for`** loop runs one `magick` command per file. That is easy to read in logs, tweak per file, and extend with checks—many teams prefer it to `mogrify` for production scripts.
+An explicit **`for`** loop runs one `magick` command per file. You get readable logs, per-file error handling, and room to add guards or logging, which is why many teams prefer loops over `mogrify` in production scripts.
 
 Resize every JPEG in `photos/` and write matching WebP files into `web/`:
 
@@ -54,7 +54,7 @@ Get-ChildItem web\*.webp | ForEach-Object { magick identify $_.FullName }
 
 ## Batch a flat folder with mogrify
 
-The same flat-folder job in one command—handy when you already trust every file in the glob:
+You can express the same flat-folder job as a single `mogrify` invocation when you already trust every file matched by the glob and you have set `-path` so originals are not overwritten.
 
 ```bash
 mkdir -p web
@@ -94,13 +94,13 @@ magick mogrify -resize '1200x>' -quality 85 -path web -format webp photos/*.jpg
   </Tab>
 </Tabs>
 
-This mirrors the source folder structure under `web/`. A file at `photos/shoes/boot1.jpg` outputs to `web/shoes/boot1.webp`.
+The loop mirrors the source tree under `web/`: for example, `photos/shoes/boot1.jpg` becomes `web/shoes/boot1.webp`, preserving the `shoes/` segment between `photos/` and the filename.
 
 ## When one file fails mid-batch
 
-`magick mogrify` applies the same operation to every path in the glob. If **one** input is corrupt or unreadable, **mogrify can exit and leave the rest untouched** (behavior depends on version and delegates—always check the terminal message).
+`magick mogrify` applies the same operation to every path in the glob. If **one** input is corrupt or unreadable, **mogrify can exit and leave the rest untouched** (behavior depends on version and delegates—always read the terminal message).
 
-**Loops give you finer control.** Log the failure and continue:
+When you need per-file control, a loop can log failures and continue with the remaining paths:
 
 ```bash
 mkdir -p web
@@ -115,7 +115,7 @@ for f in photos/*.jpg; do
 done
 ```
 
-If you intentionally want “best effort” without branching, `|| true` after `magick` suppresses a non-zero exit for that iteration—use only when you accept skipping failed files silently:
+If you intentionally want “best effort” without branching, append `|| true` after `magick` so a failed file does not abort the shell script—use this only when silently skipping failures is acceptable:
 
 ```bash
 magick "$f" -resize '1200x>' -quality 85 "web/${base}.webp" || true
@@ -159,7 +159,7 @@ On a typical large photo, `-define jpeg:extent` forces ImageMagick to lower effe
 magick input.jpg -resize '1200x>' output.jpg
 ```
 
-Width stays at or below 1200. Height adjusts to preserve aspect ratio. A 2000x3500 portrait becomes 1200x2100.
+The output width is at most 1200 pixels, and height scales to keep the aspect ratio (for example, a 2000×3500 portrait becomes 1200×2100).
 
 ### Constrain by height only
 
@@ -167,7 +167,7 @@ Width stays at or below 1200. Height adjusts to preserve aspect ratio. A 2000x35
 magick input.jpg -resize 'x800>' output.jpg
 ```
 
-Height stays at or below 800. Width adjusts. A 2000x3500 portrait becomes 457x800.
+The output height is at most 800 pixels, and width scales to keep the aspect ratio (for example, a 2000×3500 portrait becomes 457×800).
 
 ### Exact dimensions with center crop
 
@@ -197,4 +197,6 @@ A 4000x3000 landscape becomes an 800x800 image with the photo centered and white
 
 - Walk through a full resize → strip → watermark → WebP flow in the [image processing pipeline tutorial](/tutorials/build-image-processing-pipeline).
 - Look up modifiers such as `>`, `^`, and `!` in the [resize and crop syntax reference](/reference/geometry).
+- Read flag-level details in the [common options reference](/reference/common-options).
 - If commands fail or output looks wrong, use [Troubleshooting](/troubleshooting).
+- If you edit this documentation repo, shell snippets in MDX are checked in CI; see [Snippet verification (CI)](/development#snippet-verification-ci).

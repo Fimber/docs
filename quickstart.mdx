@@ -56,7 +56,7 @@ New to ImageMagick? This page takes you from installation to your first working 
     ImageMagick does not publish an official Docker image. The community-maintained [`dpokidov/imagemagick`](https://hub.docker.com/r/dpokidov/imagemagick) image provides ImageMagick 7 with broad format support and is widely used. From their documentation:
 
     ```bash
-    docker run --rm -v "$(pwd)":/imgs dpokidov/imagemagick /imgs/photo.jpg -resize 800x600 /imgs/resized.jpg
+    docker run --rm -v "$(pwd)":/imgs dpokidov/imagemagick /imgs/input.jpg -resize 800x600 /imgs/output-resized.jpg
     ```
 
     This mounts your current directory into the container, processes the image, and writes the output back to your filesystem. See the [Docker Hub page](https://hub.docker.com/r/dpokidov/imagemagick) for additional usage examples and available tags.
@@ -105,7 +105,7 @@ You should see at least one line with `WEBP` and read/write flags (`rw*` or `r--
 Convert a JPEG file to PNG:
 
 ```bash
-magick photo.jpg photo.png
+magick input.jpg output.png
 ```
 
 ImageMagick determines both input and output formats from the file extension. That single command decodes the JPEG, then re-encodes it as PNG.
@@ -115,13 +115,13 @@ ImageMagick determines both input and output formats from the file extension. Th
 Shrink an image to fit within 800x600 pixels:
 
 ```bash
-magick photo.jpg -resize 800x600 photo-small.jpg
+magick input.jpg -resize 800x600 output-small.jpg
 ```
 
 The `-resize` operation preserves the original aspect ratio. A 1600x1200 input becomes 800x600. A 2000x1500 input becomes 800x600. A 1200x800 input becomes 800x533, because 800 is the limiting dimension at the 3:2 aspect ratio.
 
 <Tip>
-  Add `>` after the dimensions to skip images that are already small enough: `magick photo.jpg -resize 800x600\> photo-small.jpg`. Without the `>`, a 400x300 image would be enlarged to 800x600. With it, the image stays untouched.
+  Add `>` after the dimensions to skip images that are already small enough: `magick input.jpg -resize 800x600\> output-small.jpg`. Without the `>`, a 400x300 image would be enlarged to 800x600. With it, the image stays untouched.
 </Tip>
 
 ## Inspect an image
@@ -129,13 +129,13 @@ The `-resize` operation preserves the original aspect ratio. A 1600x1200 input b
 Use `magick identify` to check an image's format, dimensions, and file size without opening it:
 
 ```bash
-magick identify photo.jpg
+magick identify input.jpg
 ```
 
 Output:
 
 ```
-photo.jpg JPEG 1600x1200 1600x1200+0+0 8-bit sRGB 11536B 0.000u 0:00.000
+input.jpg JPEG 1600x1200 1600x1200+0+0 8-bit sRGB 11536B 0.000u 0:00.000
 ```
 
 Reading left to right: filename, format, dimensions, geometry, bit depth, colorspace, file size.
@@ -143,7 +143,7 @@ Reading left to right: filename, format, dimensions, geometry, bit depth, colors
 For a cleaner view, use `-format` to pick the fields you want:
 
 ```bash
-magick identify -format "Format: %m\nDimensions: %wx%h\nSize: %b\n" photo.jpg
+magick identify -format "Format: %m\nDimensions: %wx%h\nSize: %b\n" input.jpg
 ```
 
 Output:
@@ -159,10 +159,10 @@ Size: 11536B
 Operations are processed left to right. You can stack several in one command:
 
 ```bash
-magick photo.jpg -resize 800x600 -quality 80 photo-web.jpg
+magick input.jpg -resize 800x600 -quality 80 output-web.jpg
 ```
 
-This resizes the image, then writes it as a JPEG at quality level 80 (lower means smaller file, more compression artifacts).
+This resizes the image, then writes it as a JPEG. The **`-quality`** number controls lossy compression for the next write (lower means smaller files and usually more visible artifacts). See [-quality](/reference/common-options#quality) for how to pick values across JPEG and WebP.
 
 The order of **operators** matters. `-resize` followed by `-crop` produces a different result than `-crop` followed by `-resize`:
 

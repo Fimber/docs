@@ -69,7 +69,7 @@ mint broken-links
 
 If the **live site** shows a blockquote such as “Documentation Index” or “Fetch the complete documentation index at … `/llms.txt`” on every page, that UI is produced by **Mintlify’s hosted shell**, not by MDX in this repository. Toggle or report that behavior in the [Mintlify dashboard](https://dashboard.mintlify.com) for your deployment (AI / ingestion or support) if you want it hidden—there is often no repo-local switch for that banner.
 
-This project still exposes the machine-readable index at **`/llms.txt`** (and `/.well-known/llms.txt`) and links it from the **site footer** under Tools. Root-level **`style.css`** hides the Mintlify “Documentation Index” blockquote on every page **except** the homepage (`html[data-current-path="/"]`), using a `blockquote:has(a[href*="llms.txt"])` selector so normal blockquotes in MDX are unaffected.
+This project still exposes the machine-readable index at **`/llms.txt`** (and `/.well-known/llms.txt`) and links it from the **site footer** under Tools. Root-level **`style.css`** hides the Mintlify “Documentation Index” blockquote on every page **except** the homepage (`html[data-current-path="/"]`), targeting `blockquote:has(a[href*="llms.txt"])` under `#content`, `#content-area`, and `mdx-content` so the rule still applies if the layout wrapper moves between Mintlify releases. Normal MDX blockquotes without an `llms.txt` link stay visible. The heading **`## Snippet verification (CI) {#snippet-verification-ci}`** in this file is the stable anchor for `/development#snippet-verification-ci`.
 
 Site-wide blurbs for SEO and generated `llms.txt` use the optional `description` field in `docs.json`; keep it aligned with the homepage when you change positioning.
 

@@ -39,9 +39,9 @@ invoke_magick() {
 pass() { echo "ok  $*"; }
 
 # --- Quickstart-style: resize + aspect (fit inside box) ---
-invoke_magick -size 1600x1200 xc:skyblue photo.jpg
-invoke_magick photo.jpg -resize 800x600 photo-small.jpg
-wh=$(invoke_magick identify -format "%wx%h" photo-small.jpg)
+invoke_magick -size 1600x1200 xc:skyblue input.jpg
+invoke_magick input.jpg -resize 800x600 output-small.jpg
+wh=$(invoke_magick identify -format "%wx%h" output-small.jpg)
 [[ "$wh" == "800x600" ]] || { echo "fail resize box: got ${wh}"; exit 1; }
 pass "resize fit inside 800x600"
 
@@ -53,22 +53,22 @@ wh2=$(invoke_magick identify -format "%wx%h" same.jpg)
 pass "resize 800x600> leaves small image unchanged"
 
 # --- Strip + identify ---
-invoke_magick photo.jpg -strip stripped.jpg
+invoke_magick input.jpg -strip stripped.jpg
 invoke_magick identify stripped.jpg >/dev/null
 pass "strip + identify"
 
 # --- Tutorial-style pipeline (composite stack) ---
 invoke_magick -size 120x32 xc:none -fill white -pointsize 18 -gravity center -annotate 0 "WM" PNG32:watermark.png
-invoke_magick -size 400x300 gradient:blue-red originals/product1.jpg
-invoke_magick originals/product1.jpg \
+invoke_magick -size 400x300 gradient:blue-red originals/input.jpg
+invoke_magick originals/input.jpg \
   -resize '160x160>' \
   -strip \
   watermark.png \
   -gravity SouthEast -geometry +4+4 \
   -composite \
   -quality 85 \
-  processed/product1.webp
-invoke_magick identify processed/product1.webp >/dev/null
+  processed/input.webp
+invoke_magick identify processed/input.webp >/dev/null
 pass "resize + strip + watermark + webp composite"
 
 # --- mogrify -path -format (how-to batch) ---

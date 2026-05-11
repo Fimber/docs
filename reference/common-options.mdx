@@ -17,7 +17,7 @@ These options appear throughout the [quickstart](/quickstart), [tutorial](/tutor
 **Example:**
 
 ```bash
-magick photo.jpg -strip web.jpg
+magick input.jpg -strip output.jpg
 ```
 
 ## `-quality` {#quality}
@@ -28,10 +28,12 @@ magick photo.jpg -strip web.jpg
 
 **Typical use:** Balance file size vs. artifacts after `-resize` and before the output filename.
 
+**Across these docs:** examples often use **`-quality 85`** for web-bound JPEG and WebP so copy-paste commands match each other; treat that as a starting point, not a requirement. Tune per asset and format.
+
 **Example:**
 
 ```bash
-magick photo.jpg -resize '1200x>' -quality 85 output.webp
+magick input.jpg -resize '1200x>' -quality 85 output.webp
 ```
 
 ## `-auto-orient` {#auto-orient}
@@ -45,7 +47,7 @@ magick photo.jpg -resize '1200x>' -quality 85 output.webp
 **Example:**
 
 ```bash
-magick upload.jpg -auto-orient -resize '800x800>' -quality 85 upload.webp
+magick input.jpg -auto-orient -resize '800x800>' -quality 85 output.webp
 ```
 
 Place it **immediately after the input** (or right after reading the first image in a stack) so every later operator sees the corrected pixels.
@@ -61,7 +63,7 @@ Place it **immediately after the input** (or right after reading the first image
 **Example (crop from center):**
 
 ```bash
-magick wide.jpg -gravity center -crop 800x600+0+0 +repage crop.jpg
+magick input-wide.jpg -gravity center -crop 800x600+0+0 +repage output-crop.jpg
 ```
 
 Reset unusual gravity with `-gravity None` when you need the default origin again.
@@ -77,7 +79,7 @@ Reset unusual gravity with `-gravity None` when you need the default origin agai
 **Example (pad to square with white bars):**
 
 ```bash
-magick photo.jpg -resize '800x800>' -gravity center -background white -extent 800x800 tile.jpg
+magick input.jpg -resize '800x800>' -gravity center -background white -extent 800x800 output-square.jpg
 ```
 
 ## `-composite` {#composite}
@@ -91,7 +93,7 @@ magick photo.jpg -resize '800x800>' -gravity center -background white -extent 80
 **Example:**
 
 ```bash
-magick product.jpg watermark.png -gravity SouthEast -geometry +20+20 -composite listed.jpg
+magick input.jpg watermark.png -gravity SouthEast -geometry +20+20 -composite output.jpg
 ```
 
-Here `product.jpg` is the bottom layer, `watermark.png` is stacked on top, and `-composite` flattens them using the given gravity and offset.
+Here `input.jpg` is the bottom layer, `watermark.png` is stacked on top, and `-composite` flattens them using the given gravity and offset.
