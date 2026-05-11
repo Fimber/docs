@@ -25,15 +25,18 @@ New to ImageMagick? This page takes you from installation to your first working 
     [MacPorts](https://www.macports.org/) (`sudo port install ImageMagick`) is an alternative if you prefer it.
   </Tab>
   <Tab title="Linux">
-    Download the official AppImage from the [releases page](https://github.com/ImageMagick/ImageMagick/releases). The AppImage is a self-contained binary that requires no installation:
+    Download an **ImageMagick 7** AppImage from the [GitHub releases](https://github.com/ImageMagick/ImageMagick/releases) page. Pick the asset that matches your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 build on Apple Silicon Linux VMs). Copy the **exact download URL** from the release you want—do not reuse version numbers from older blog posts or docs, because filenames change every release.
 
     ```bash
-    wget https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage
-    chmod +x ImageMagick-7.1.2-21-gcc-x86_64.AppImage
-    sudo mv ImageMagick-7.1.2-21-gcc-x86_64.AppImage /usr/local/bin/magick
+    wget -O magick-appimage "PASTE_RELEASE_ASSET_URL_HERE"
+    chmod +x magick-appimage
+    sudo mv magick-appimage /usr/local/bin/magick
+    magick --version
     ```
 
-    On Ubuntu 26.04 and later, the `imagemagick` package from `apt` may include version 7. Check with `magick --version` after installing. On Ubuntu 24.04 and earlier, `apt install imagemagick` installs version 6. Use the AppImage above to get version 7.
+    The AppImage is self-contained (no `apt install` of ImageMagick required for that binary).
+
+    On Ubuntu 26.04 and later, the `imagemagick` package from `apt` may include version 7. Check with `magick --version` after installing. On Ubuntu 24.04 and earlier, `apt install imagemagick` often installs version 6 only; use a current AppImage or another [official install path](https://imagemagick.org/script/download.php#linux) if you need the `magick` CLI from version 7.
   </Tab>
   <Tab title="Windows">
     Download the installer from the [ImageMagick releases page](https://imagemagick.org/script/download.php#windows). Choose the **Q16** variant (16 bits per channel) for most use cases.

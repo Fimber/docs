@@ -1,0 +1,133 @@
+---
+title: Batch Resize and Optimize for Web
+sidebarTitle: Batch resize and optimize
+description: Resize a folder of images for web delivery with format conversion, quality control, and file size constraints.
+---
+
+This guide covers batch-resizing images to a maximum width, converting to WebP or JPEG, and handling common edge cases like mixed orientations and already-small files.
+
+## Resize and convert a single image
+
+Constrain an image to a maximum width of 1200 pixels and output as WebP:
+
+```bash
+magick input.jpg -resize '1200x>' -quality 85 output.webp
+```
+
+See [geometry syntax](/reference/geometry) for a full breakdown of the `1200x>` format.
+
+## Batch-convert a flat folder
+
+Use `magick mogrify` to process every JPEG in a folder and write WebP copies to a separate directory:
+
+```bash
+mkdir -p web
+magick mogrify -resize '1200x>' -quality 85 -path web -format webp photos/*.jpg
+```
+
+<Info>
+  **Verify on your machine:** `mogrify` behavior can differ slightly by build. After running the command, confirm files appear under `web/` with `.webp` names. CI runs `bash scripts/verify-snippets.sh` against ImageMagick 7 in Docker; see [Snippet verification (CI)](/development#snippet-verification-ci).
+</Info>
+
+## Batch-convert with subdirectories
+
+`mogrify` does not recurse into subdirectories or preserve folder structure. Use `find` with a loop:
+
+<Tabs>
+  <Tab title="Linux / macOS">
+    ```bash
+    find photos -name '*.jpg' | while read file; do
+      relpath="${file#photos/}"
+      outdir="web/$(dirname "$relpath")"
+      mkdir -p "$outdir"
+      magick "$file" -resize '1200x>' -quality 85 \
+        "$outdir/$(basename "$relpath" .jpg).webp"
+    done
+    ```
+  </Tab>
+  <Tab title="Windows (PowerShell)">
+    ```powershell
+    Get-ChildItem -Recurse photos\*.jpg | ForEach-Object {
+      $rel = $_.FullName.Substring((Resolve-Path photos).Path.Length + 1)
+      $outDir = "web\" + (Split-Path $rel)
+      New-Item -ItemType Directory -Force -Path $outDir | Out-Null
+      $outFile = $outDir + "\" + $_.BaseName + ".webp"
+      magick $_.FullName -resize "1200x>" -quality 85 $outFile
+    }
+    ```
+  </Tab>
+</Tabs>
+
+This mirrors the source folder structure under `web/`. A file at `photos/shoes/boot1.jpg` outputs to `web/shoes/boot1.webp`.
+
+## Fix rotated phone photos
+
+Add `-auto-orient` before any resize operation to correct rotation flags from phone cameras:
+
+```bash
+magick input.jpg -auto-orient -resize '1200x>' -quality 85 output.webp
+```
+
+In a batch pipeline, place it immediately after the input:
+
+```bash
+magick mogrify -auto-orient -resize '1200x>' -quality 85 -path web -format webp photos/*.jpg
+```
+
+## Enforce a file size ceiling (JPEG)
+
+For JPEG output, `-define jpeg:extent` caps the file size. ImageMagick adjusts quality downward as needed:
+
+```bash
+magick input.jpg -resize '1200x>' -define jpeg:extent=200KB output.jpg
+```
+
+On a typical large photo, `-define jpeg:extent` forces ImageMagick to lower effective quality until the file is at or under the limit (exact behavior depends on content and JPEG encoder settings). Confirm with `wc -c` or your file manager after running the command on your assets.
+
+<Info>
+  `jpeg:extent` is specific to JPEG output. WebP has no equivalent built-in ceiling. For WebP, control file size through `-quality`.
+</Info>
+
+## Resize to different constraints
+
+### Constrain by width only
+
+```bash
+magick input.jpg -resize '1200x>' output.jpg
+```
+
+Width stays at or below 1200. Height adjusts to preserve aspect ratio. A 2000x3500 portrait becomes 1200x2100.
+
+### Constrain by height only
+
+```bash
+magick input.jpg -resize 'x800>' output.jpg
+```
+
+Height stays at or below 800. Width adjusts. A 2000x3500 portrait becomes 457x800.
+
+### Exact dimensions with center crop
+
+Fill the target dimensions and crop overflow from the center:
+
+```bash
+magick input.jpg -resize '1200x800^' -gravity center -extent 1200x800 output.jpg
+```
+
+The output is exactly 1200x800, cropped from the center. See [geometry syntax](/reference/geometry) for how `^` differs from other resize modifiers.
+
+### Fit within a box with padding
+
+Resize to fit inside 800x800, then pad the remaining space with a background color:
+
+```bash
+magick input.jpg -resize '800x800>' -gravity center -background white -extent 800x800 output.jpg
+```
+
+A 4000x3000 landscape becomes an 800x800 image with the photo centered and white bars on top and bottom. Useful for product listings that require square thumbnails.
+
+## Next steps
+
+- Walk through a full resize → strip → watermark → WebP flow in the [image processing pipeline tutorial](/tutorials/build-image-processing-pipeline).
+- Look up modifiers such as `>`, `^`, and `!` in the [geometry syntax reference](/reference/geometry).
+- If commands fail or output looks wrong, use [Troubleshooting](/troubleshooting).

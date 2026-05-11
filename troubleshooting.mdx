@@ -1,0 +1,371 @@
+---
+title: Troubleshooting
+sidebarTitle: Troubleshoot errors
+description: Solutions for common ImageMagick errors and unexpected output.
+---
+
+## Errors
+
+<AccordionGroup>
+  <Accordion title="magick: not found / 'magick' is not recognized">
+    **Cause:** ImageMagick 7 is not installed, or the `magick` binary is not on your system PATH.
+
+    **Fix:** Verify which version you have:
+
+    ```bash
+    magick --version
+    convert --version
+    ```
+
+    If `convert` works but `magick` does not, you have ImageMagick 6 installed. In version 6, the commands are standalone binaries (`convert`, `identify`, `mogrify`). In version 7, they are subcommands of `magick` (`magick convert`, `magick identify`, or just `magick` directly).
+
+    To get version 7, see [Install ImageMagick](/quickstart#install-imagemagick).
+
+    If neither command works, ImageMagick is not installed or is not on your PATH. On Linux, check with `which magick` or `which convert`. On Windows, verify that the ImageMagick install directory is listed in your system PATH environment variable.
+  </Accordion>
+
+  <Accordion title="no decode delegate for this image format">
+    **Error:**
+
+    ```
+    magick: no decode delegate for this image format 'HEIC'
+    ```
+
+    **Cause:** Your ImageMagick build does not include support for the requested format. Each format requires a delegate library (e.g., `libheif` for HEIC, `libwebp` for WebP).
+
+    **Fix:** Check which formats your build supports:
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        magick -list format | grep -i heic
+        ```
+      </Tab>
+      <Tab title="Windows (PowerShell)">
+        ```powershell
+        magick -list format | Select-String -Pattern heic -CaseSensitive:$false
+        ```
+      </Tab>
+    </Tabs>
+
+    If the format is missing, you need to install the delegate library and either reinstall ImageMagick or rebuild from source. On macOS with Homebrew, `brew reinstall imagemagick` usually picks up newly installed libraries. On Linux, install the delegate package (e.g., `libheif-dev`) and rebuild.
+
+    Formats marked `r--` support reading only. Formats marked `rw-` support reading and writing.
+  </Accordion>
+
+  <Accordion title="no encode delegate for this image format">
+    **Error:**
+
+    ```
+    magick: no encode delegate for this image format 'HEIC'
+    ```
+
+    **Cause:** Your build can read the format but cannot write to it. HEIC is a common example: many builds include read support via `libheif` but not write support.
+
+    **Fix:** Check the format's read/write support:
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        magick -list format | grep -i heic
+        ```
+      </Tab>
+      <Tab title="Windows (PowerShell)">
+        ```powershell
+        magick -list format | Select-String -Pattern heic -CaseSensitive:$false
+        ```
+      </Tab>
+    </Tabs>
+
+    A line showing `r--` means read-only. You need a build with write support (`rw-` or `rw+`), or convert to a different output format.
+  </Accordion>
+
+  <Accordion title="cache resources exhausted">
+    **Error:**
+
+    ```
+    magick: cache resources exhausted 'image.jpg'
+    ```
+
+    **Cause:** The image exceeds ImageMagick's memory, disk, or dimension limits. This happens with very large images or when processing many images in sequence.
+
+    **Fix:** Check your current limits:
+
+    ```bash
+    magick -list resource
+    ```
+
+    Increase limits for the current command using `-limit`:
+
+    ```bash
+    magick -limit memory 2GiB -limit disk 4GiB input.jpg -resize 800x600 output.jpg
+    ```
+
+    To change defaults permanently, edit the `policy.xml` file (or the policy fragment your packager uses). Find active policy paths with:
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        magick -list policy | head -25
+        ```
+      </Tab>
+      <Tab title="Windows (PowerShell)">
+        ```powershell
+        magick -list policy | Select-Object -First 25
+        ```
+      </Tab>
+    </Tabs>
+
+    ImageMagick may load **several** policy files (system, user, delegates). Paths differ between the Windows installer, Homebrew, Debian packages, and Docker images—use the output above on **your** machine.
+
+    Update the resource values:
+
+    ```xml
+    <policy domain="resource" name="memory" value="2GiB"/>
+    <policy domain="resource" name="disk" value="4GiB"/>
+    ```
+  </Accordion>
+
+  <Accordion title="not authorized">
+    **Error:**
+
+    ```
+    magick: not authorized 'input.pdf'
+    ```
+
+    **Cause:** The security policy (`policy.xml`) blocks the file type. PDF, EPS, PS, and SVG are commonly restricted because they can execute code through delegates like Ghostscript.
+
+    **Fix:** Find which policy files apply, then edit the one that sets the restriction (often a `policy.xml` under ImageMagick’s config path):
+
+    <Tabs>
+      <Tab title="Linux / macOS">
+        ```bash
+        magick -list policy | head -25
+        ```
+      </Tab>
+      <Tab title="Windows (PowerShell)">
+        ```powershell
+        magick -list policy | Select-Object -First 25
+        ```
+      </Tab>
+    </Tabs>
+
+    Look for a line restricting the relevant coder:
+
+    ```xml
+    <policy domain="coder" rights="none" pattern="PDF" />
+    ```
+
+    Change `rights="none"` to `rights="read|write"` to allow the format:
+
+    ```xml
+    <policy domain="coder" rights="read|write" pattern="PDF" />
+    ```
+
+    <Warning>
+      These formats are restricted by default for security reasons. PDF and PostScript processing relies on Ghostscript, which has had serious vulnerabilities. Only relax these policies on machines that do not process untrusted input files.
+    </Warning>
+  </Accordion>
+
+  <Accordion title="insufficient image data / improper image header">
+    **Error:**
+
+    ```
+    magick: insufficient image data in file 'photo.jpg'
+    magick: improper image header 'photo.bmp'
+    ```
+
+    **Cause:** The file is corrupted, truncated (incomplete download), or has the wrong file extension. A file named `.jpg` that contains PNG data, or a file that was only partially downloaded, triggers this error.
+
+    **Fix:** Verify the file with `identify`:
+
+    ```bash
+    magick identify photo.jpg
+    ```
+
+    If `identify` also fails, the file is damaged. Check whether the file extension matches the actual format:
+
+    ```bash
+    file photo.jpg
+    ```
+
+    The `file` command (Linux/macOS) reads the file header and reports the real format regardless of the extension. On Windows, use `magick identify` instead, which reports the detected format in its output.
+
+    If the format doesn't match the extension, rename the file or convert it explicitly:
+
+    ```bash
+    magick PNG:photo.jpg output.jpg
+    ```
+
+    The `PNG:` prefix forces ImageMagick to read the file as PNG regardless of the `.jpg` extension.
+  </Accordion>
+</AccordionGroup>
+
+## Wrong output
+
+<AccordionGroup>
+  <Accordion title="Colors look wrong after conversion">
+    **Cause:** The source image is in CMYK colorspace (common in files from print workflows), and the output was not explicitly converted to RGB. Some viewers display CMYK data as inverted or shifted colors.
+
+    **Fix:** Check the colorspace of the input:
+
+    ```bash
+    magick identify -format '%[colorspace]' input.jpg
+    ```
+
+    If it reports `CMYK`, convert explicitly:
+
+    ```bash
+    magick input.jpg -colorspace sRGB output.jpg
+    ```
+
+    Without `-colorspace sRGB`, ImageMagick may preserve the CMYK data in the output file. Programs expecting RGB will display the colors incorrectly.
+  </Accordion>
+
+  <Accordion title="Transparent areas turn black">
+    **Cause:** You converted a PNG with transparency to JPEG (or another format that does not support alpha channels). ImageMagick fills transparent areas with the default background color, which is black.
+
+    **Fix:** Flatten the image onto a white (or any other color) background before converting:
+
+    ```bash
+    magick input.png -background white -flatten output.jpg
+    ```
+
+    `-background white -flatten` composites the image onto a white canvas, replacing all transparent areas before writing the JPEG.
+  </Accordion>
+
+  <Accordion title="Image appears rotated or sideways">
+    **Cause:** The source image has an EXIF orientation flag that your viewer respects, but ImageMagick did not apply it during processing. The pixel data is still in the camera's native orientation.
+
+    **Fix:** Add `-auto-orient` before any other operations:
+
+    ```bash
+    magick input.jpg -auto-orient -resize 800x600 output.jpg
+    ```
+
+    `-auto-orient` reads the EXIF orientation flag, physically rotates the pixels to match, and removes the flag.
+  </Accordion>
+
+  <Accordion title="Output file is larger than the input">
+    **Cause:** Converting between formats can increase file size. PNG is lossless and often larger than JPEG for photographic images. Resizing upward increases file size. Converting from a lossy format to another lossy format at high quality can also increase size.
+
+    **Fix:** Set an explicit quality level:
+
+    ```bash
+    magick input.jpg -quality 85 output.jpg
+    ```
+
+    For JPEG output, `-quality 85` is a reasonable default. For WebP, `-quality 85` also works. Lower values produce smaller files. For JPEG, you can also set a file size ceiling:
+
+    ```bash
+    magick input.jpg -define jpeg:extent=200KB output.jpg
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Platform-specific issues
+
+<AccordionGroup>
+  <Accordion title="Shell interprets >, <, ^, or ! in geometry strings">
+    **Cause:** Characters like `>`, `<`, `^`, and `!` have special meaning in bash, PowerShell, and cmd. An unquoted `800x600>` redirects output to a file named `600` instead of passing the string to ImageMagick.
+
+    **Fix:**
+
+    <Tabs>
+      <Tab title="Linux / macOS (bash)">
+        Wrap geometry strings in single quotes:
+
+        ```bash
+        magick input.jpg -resize '800x600>' output.jpg
+        ```
+
+        Or escape with a backslash:
+
+        ```bash
+        magick input.jpg -resize 800x600\> output.jpg
+        ```
+      </Tab>
+      <Tab title="Windows (PowerShell)">
+        Wrap geometry strings in double quotes:
+
+        ```powershell
+        magick input.jpg -resize "800x600>" output.jpg
+        ```
+      </Tab>
+      <Tab title="Windows (cmd)">
+        Use the caret (`^`) to escape special characters:
+
+        ```cmd
+        magick input.jpg -resize 800x600^> output.jpg
+        ```
+
+        For the `^` geometry flag itself, double it:
+
+        ```cmd
+        magick input.jpg -resize "800x600^^" output.jpg
+        ```
+      </Tab>
+    </Tabs>
+  </Accordion>
+
+  <Accordion title="Parentheses cause errors on Windows">
+    **Cause:** ImageMagick uses `(` and `)` for image sequence grouping. In cmd, parentheses are control characters.
+
+    **Fix:** In cmd, escape with `^`:
+
+    ```cmd
+    magick ^( -size 300x60 xc:none -annotate 0 "text" ^) overlay.png
+    ```
+
+    In PowerShell, wrap in quotes or use the backtick:
+
+    ```powershell
+    magick `( -size 300x60 xc:none -annotate 0 "text" `) overlay.png
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Diagnostic commands
+
+Quick reference for commands that help diagnose issues:
+
+<Tabs>
+  <Tab title="Linux / macOS (bash)">
+    ```bash
+    # Check ImageMagick version and delegates
+    magick --version
+
+    # Check if a format is supported (read/write flags in the listing)
+    magick -list format | grep -i webp
+
+    # Resource limits (memory, disk, threads)
+    magick -list resource
+
+    # Security policy sources and rules
+    magick -list policy
+
+    # Deep inspection of one file
+    magick identify -verbose input.jpg
+
+    # Real container format from the file header (optional)
+    file input.jpg
+    ```
+  </Tab>
+  <Tab title="Windows (PowerShell)">
+    ```powershell
+    magick --version
+
+    magick -list format | Select-String -Pattern webp -CaseSensitive:$false
+
+    magick -list resource
+
+    magick -list policy
+
+    magick identify -verbose input.jpg
+    ```
+
+    There is no built-in `file` command; `magick identify` already reports the detected format.
+  </Tab>
+</Tabs>
+
+If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), or [geometry reference](/reference/geometry). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).

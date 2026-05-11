@@ -1,0 +1,27 @@
+name: Verify doc snippets
+
+on:
+  push:
+    paths:
+      - '**/*.mdx'
+      - 'docs.json'
+      - 'scripts/**'
+      - '.github/workflows/verify-docs-snippets.yml'
+  pull_request:
+    paths:
+      - '**/*.mdx'
+      - 'docs.json'
+      - 'scripts/**'
+      - '.github/workflows/verify-docs-snippets.yml'
+
+jobs:
+  imagemagick-snippets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Pull ImageMagick 7 container
+        run: docker pull dpokidov/imagemagick:latest
+
+      - name: Run snippet verification
+        run: bash scripts/verify-snippets.sh

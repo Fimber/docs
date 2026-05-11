@@ -1,0 +1,159 @@
+---
+title: Geometry Syntax Reference
+sidebarTitle: Geometry syntax
+description: Complete reference for the geometry argument used by resize, crop, extent, and other spatial operations.
+---
+
+Geometry is a string format that specifies dimensions, offsets, and resize behavior. It appears in `-resize`, `-crop`, `-extent`, `-thumbnail`, `-scale`, `-sample`, and other options that manipulate image dimensions. The authoritative overview is [Command-line processing — geometry](https://imagemagick.org/script/command-line-processing.php#geometry) on imagemagick.org; this page summarizes the parts doc readers use most often.
+
+## Base syntax
+
+| Format | Meaning | Example on 1600x1200 |
+|--------|---------|----------------------|
+| `WxH` | Fit within W by H, preserve aspect ratio | `800x400` → 533x400 |
+| `W` | Set width, height adjusts proportionally | `800` → 800x600 |
+| `xH` | Set height, width adjusts proportionally | `x600` → 800x600 |
+| `W%` | Scale both dimensions by percentage | `50%` → 800x600 |
+| `W%xH%` | Scale width and height by different percentages | `50%x25%` → 800x300 |
+| `WxH+X+Y` | Dimensions with offset (used by `-crop`) | `400x300+100+50` → 400x300 region starting at pixel 100,50 |
+| `A@` | Resize to approximate pixel area A | `640000@` → 924x693 (area ≈ 640,000) |
+
+<Info>
+  Geometry dimensions are in pixels. ImageMagick does not factor in DPI or print resolution when interpreting geometry strings. An image at 300 DPI and an image at 72 DPI with the same pixel dimensions receive the same resize result.
+</Info>
+
+## Resize modifier flags
+
+Modifier flags are appended to the end of a geometry string. They change how ImageMagick handles aspect ratio and sizing constraints.
+
+All examples below use a **1600x1200** input image and a target of **800x400**.
+
+### No flag (default)
+
+```bash
+magick input.jpg -resize 800x400 output.jpg
+```
+
+Fits the image within 800x400 while preserving aspect ratio. The result never exceeds either dimension. Output: **533x400** (height is the limiting dimension).
+
+### `!` Force exact dimensions
+
+```bash
+magick input.jpg -resize '800x400!' output.jpg
+```
+
+Ignores aspect ratio and forces the image to exactly 800x400. Output: **800x400**.
+
+<Warning>
+  The `!` flag distorts the image if the target aspect ratio differs from the source. A 4:3 image forced into 2:1 dimensions will appear horizontally stretched.
+</Warning>
+
+### `>` Only shrink
+
+```bash
+magick input.jpg -resize '800x600>' output.jpg
+```
+
+Resizes the image only if it is larger than the target. If the image already fits within the dimensions, it stays unchanged.
+
+| Input size | Target | Output |
+|-----------|--------|--------|
+| 1600x1200 | `800x600>` | 800x600 (shrunk) |
+| 400x300 | `800x600>` | 400x300 (unchanged) |
+
+### `<` Only enlarge
+
+```bash
+magick input.jpg -resize '800x600<' output.jpg
+```
+
+Resizes the image only if it is smaller than the target. Larger images stay unchanged.
+
+| Input size | Target | Output |
+|-----------|--------|--------|
+| 400x300 | `800x600<` | 800x600 (enlarged) |
+| 1600x1200 | `800x600<` | 1600x1200 (unchanged) |
+
+### `^` Fill area
+
+```bash
+magick input.jpg -resize '800x400^' output.jpg
+```
+
+Scales the image to completely fill the target area. One dimension will match; the other may exceed the target. Output: **800x600** (width matches 800, height overflows to 600).
+
+This is typically paired with `-gravity center -extent` to crop the overflow:
+
+```bash
+magick input.jpg -resize '800x400^' -gravity center -extent 800x400 output.jpg
+```
+
+Output: **800x400** (filled and cropped from center).
+
+## Offset syntax
+
+Offsets specify a position within the image, written as `+X+Y` or `-X-Y` after the dimensions. They are primarily used with `-crop` and `-extent`.
+
+```bash
+magick input.jpg -crop 400x300+100+50 +repage output.jpg
+```
+
+This extracts a 400x300 region starting 100 pixels from the left edge and 50 pixels from the top edge. The `+repage` resets the virtual canvas to match the cropped dimensions.
+
+Negative offsets shift in the opposite direction:
+
+```bash
+magick input.jpg -crop 400x300-50-25 +repage output.jpg
+```
+
+This shifts the crop region 50 pixels left and 25 pixels up from the default origin. Pixels outside the image boundary are not included; the result may be smaller than 400x300.
+
+## Gravity and crop offsets
+
+When `-gravity` is set, crop offsets are measured from the gravity anchor point instead of the top-left corner.
+
+| Gravity | Offset origin | `-crop 400x400+0+0` on 800x800 |
+|---------|--------------|-------------------------------|
+| `NorthWest` (default) | Top-left corner | Top-left quadrant |
+| `NorthEast` | Top-right corner | Top-right quadrant |
+| `Center` | Center of image | Center region |
+| `SouthEast` | Bottom-right corner | Bottom-right quadrant |
+| `South` | Bottom-center edge | Bottom-center region |
+
+`-gravity` persists for all subsequent spatial operations until explicitly reset. To reset it:
+
+```bash
+magick input.jpg -gravity Center -crop 400x400+0+0 +repage -gravity None -crop 200x200+0+0 +repage output.jpg
+```
+
+The first crop uses Center gravity. The second crop uses the default top-left origin after `-gravity None` resets it.
+
+## Options that accept geometry
+
+**Resize operations** (all preserve aspect ratio by default, all accept modifier flags):
+
+| Option | Behavior |
+|--------|----------|
+| `-resize` | High-quality resize with filtering |
+| `-thumbnail` | Same as `-resize` but also strips metadata and color profiles |
+| `-scale` | Simplified resize (no pixel filtering, faster) |
+| `-sample` | Nearest-neighbor resize (no interpolation, fastest, may alias) |
+
+**Crop and extent operations** (use `WxH+X+Y` offset syntax):
+
+| Option | Behavior |
+|--------|----------|
+| `-crop` | Extract a region; add `+repage` to reset virtual canvas |
+| `-extent` | Set canvas size; pads with `-background` color if larger than image |
+
+## Edge cases
+
+**`x600` vs `0x600`.** These are different. `x600` omits the width, so ImageMagick calculates it proportionally from the height. `0x600` specifies a width of zero, which produces a 1x1 pixel output. Always omit the dimension rather than setting it to zero.
+
+**Percentage with different axes.** `50%` scales both width and height by 50%. `50%x25%` scales width by 50% and height by 25% independently, which changes the aspect ratio.
+
+**Decimal percentages.** Values like `33.3%` are valid. ImageMagick rounds the result to the nearest whole pixel. A 1600x1200 image at `33.3%` becomes 533x400.
+
+**Area resize (`@`).** The `@` flag targets an approximate pixel count rather than specific dimensions. `640000@` on a 1600x1200 image produces 924x693 (area = 640,332). The result preserves aspect ratio and gets as close to the target area as possible.
+
+**Shell escaping.** The `>`, `<`, `^`, and `!` characters have special meaning in most shells. Wrap geometry strings in single quotes on Linux/macOS (`'800x600>'`) or double quotes on Windows (`"800x600>"`). The backslash escape (`800x600\>`) also works on Linux/macOS.
