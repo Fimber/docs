@@ -28,20 +28,8 @@
             "pages": ["quickstart"]
           },
           {
-            "group": "Learn",
-            "pages": ["tutorials/build-image-processing-pipeline"]
-          },
-          {
-            "group": "How-To Guides",
-            "pages": ["how-to/batch-resize-and-optimize"]
-          },
-          {
-            "group": "Reference",
-            "pages": ["reference/geometry"]
-          },
-          {
-            "group": "Help",
-            "pages": ["troubleshooting"]
+            "group": "Development",
+            "pages": ["development"]
           }
         ]
       }
