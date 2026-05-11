@@ -156,12 +156,22 @@ The first crop uses Center gravity. The second crop uses the default top-left or
 
 ## Edge cases
 
-**`x600` vs `0x600`.** These are different. `x600` omits the width, so ImageMagick calculates it proportionally from the height. `0x600` specifies a width of zero, which produces a 1x1 pixel output. Always omit the dimension rather than setting it to zero.
+### `x600` vs `0x600`
 
-**Two-axis percentages (`50%x25%`).** Covered in the base table above: width and height scale **independently**, so the picture stretches unless both percentages match.
+These are different. `x600` omits the width, so ImageMagick calculates it proportionally from the height. `0x600` specifies a width of zero, which produces a 1x1 pixel output. Always omit the dimension rather than setting it to zero.
 
-**Decimal percentages.** Values like `33.3%` are valid. ImageMagick rounds the result to the nearest whole pixel. A 1600x1200 image at `33.3%` becomes 533x400.
+### Two-axis percentages (`50%x25%`)
 
-**Area resize (`@`).** The `@` flag targets an approximate pixel count rather than specific dimensions. `640000@` on a 1600x1200 image produces 924x693 (area = 640,332). The result preserves aspect ratio and gets as close to the target area as possible.
+Covered in the base table above: width and height scale **independently**, so the picture stretches unless both percentages match.
 
-**Shell escaping.** The `>`, `<`, `^`, and `!` characters have special meaning in most shells. Wrap geometry strings in single quotes on Linux/macOS (`'800x600>'`) or double quotes on Windows (`"800x600>"`). The backslash escape (`800x600\>`) also works on Linux/macOS.
+### Decimal percentages
+
+Values like `33.3%` are valid. ImageMagick rounds the result to the nearest whole pixel. A 1600x1200 image at `33.3%` becomes 533x400.
+
+### Area resize (`@`)
+
+The `@` flag targets an approximate pixel count rather than specific dimensions. `640000@` on a 1600x1200 image produces 924x693 (area = 640,332). The result preserves aspect ratio and gets as close to the target area as possible.
+
+### Shell escaping
+
+The `>`, `<`, `^`, and `!` characters have special meaning in most shells. Wrap geometry strings in single quotes on Linux/macOS (`'800x600>'`) or double quotes on Windows (`"800x600>"`). The backslash escape (`800x600\>`) also works on Linux/macOS.

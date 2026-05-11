@@ -1,11 +1,8 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "ImageMagick Documentation",
+  "name": "ImageMagick",
   "description": "ImageMagick is a scriptable image engine — run it in a terminal, call it from any language, or drop it into a CI pipeline. Convert, resize, composite, and filter images without a GUI, on any OS.",
   "theme": "mint",
-  "contextual": {
-    "options": []
-  },
   "colors": {
     "primary": "#1a56db",
     "light": "#3b82f6",

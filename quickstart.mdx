@@ -27,21 +27,19 @@ New to ImageMagick? This page takes you from installation to your first working 
   <Tab title="Linux">
     For a **known ImageMagick 7** CLI on Linux, use the **official AppImage** from [ImageMagick on GitHub Releases](https://github.com/ImageMagick/ImageMagick/releases).
 
-    Go to the releases page, open the **7.x** release you want, expand **Assets**, and copy the URL of the `.AppImage` that matches your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 AppImage on ARM). In most browsers you can **right-click the asset name → Copy link**.
-
-    Then install it (replace the quoted URL with the one you copied):
+    **Fast path (Intel/AMD x86_64):** run this as-is when the asset still exists. If `wget` returns **404**, the release was rotated—use the “Any CPU / any 7.x release” steps below.
 
     ```bash
-    wget -O magick-appimage "PASTE_THE_COPIED_URL_HERE"
+    wget -O magick-appimage "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage"
     chmod +x magick-appimage
     sudo mv magick-appimage /usr/local/bin/magick
     magick --version
     ```
 
-    **Pinned example (Intel/AMD x86_64):** this URL was valid at publish time; if `wget` returns **404**, the file was renamed—use the copy-link steps above on the [releases page](https://github.com/ImageMagick/ImageMagick/releases).
+    **Any CPU / any 7.x release:** open the [releases page](https://github.com/ImageMagick/ImageMagick/releases), pick a **7.x** release, expand **Assets**, find the `.AppImage` for your architecture (`ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 build on ARM). Copy its URL (in most browsers: **right-click the file name → Copy link address**). Paste that URL into the quotes in the next command—nothing else in the line should be edited.
 
     ```bash
-    wget -O magick-appimage "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage"
+    wget -O magick-appimage "PUT_THE_GITHUB_ASSET_URL_YOU_COPIED_HERE"
     chmod +x magick-appimage
     sudo mv magick-appimage /usr/local/bin/magick
     magick --version

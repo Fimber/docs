@@ -91,6 +91,8 @@ GitHub Actions runs the same script on pushes and pull requests that touch `**/*
 
 Connect the GitHub repo in the [Mintlify dashboard](https://dashboard.mintlify.com) and install the GitHub app so pushes to the default branch deploy the site. In GitHub Actions or your host, a successful deploy shows all checks passing on the pull request or workflow run.
 
+**If production does not match GitHub:** In Mintlify, confirm the project is wired to **`https://github.com/Fimber/docs`** (or your fork) and the production branch is **`main`**. Compare the footer commit or your deploy log to [the latest commit on `main`](https://github.com/Fimber/docs/commits/main). Trigger a **manual redeploy** from the Mintlify dashboard if the integration missed a push, and hard-refresh the browser (or try an incognito window) to bypass a stale CDN cache.
+
 ## Code formatting
 
 We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
