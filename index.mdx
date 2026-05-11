@@ -1,51 +1,90 @@
 ---
 title: ImageMagick Documentation
 sidebarTitle: What is ImageMagick
-description: Command-line tools and libraries for processing, converting, and editing images in 200+ formats.
+description: ImageMagick is a scriptable image engine — run it in a terminal, call it from any language, or drop it into a CI pipeline. Convert, resize, composite, and filter images without a GUI, on any OS.
 ---
 
-ImageMagick is a free, open-source toolkit for manipulating images from the command line. You can convert between formats, resize in batch, composite images together, apply filters, add text, and automate complex image pipelines with shell scripts or any programming language.
+ImageMagick is a scriptable image engine — run it in a terminal, call it from any language, or drop it into a CI pipeline. Convert, resize, composite, and filter images without a GUI, on any OS.
 
-It runs on Linux, macOS, and Windows. Most Linux distributions and Homebrew on macOS include it in their package managers.
+It ships on Linux, macOS, and Windows. These pages focus on **ImageMagick 7** and the `magick` driver command.
 
-<Info>
-  This documentation covers **ImageMagick 7** (the `magick` command). If you are migrating from version 6, the main change is that standalone commands like `convert`, `mogrify`, and `identify` are now subcommands of `magick`. For example, `convert input.jpg output.png` becomes `magick input.jpg output.png`. See the [v6 to v7 porting guide](https://imagemagick.org/script/porting.php) for full details.
-</Info>
+<Note>
+  **v7 docs** — Migrating from v6? Standalone `convert` / `mogrify` are now invoked through `magick`. See the [v6 → v7 porting guide](https://imagemagick.org/script/porting.php).
+</Note>
 
-## What you can build with it
+## Who is this for?
 
-**Automate image pipelines for the web.** Convert uploads to WebP/AVIF, generate thumbnails at multiple sizes, and optimize file size as part of a build step or server-side script.
+<CardGroup cols={3}>
+  <Card title="Developers" icon="code">
+    Embed ImageMagick in upload pipelines, build steps, CI jobs, or server-side scripts so image work never depends on a desktop app.
+  </Card>
+  <Card title="Sysadmins" icon="server">
+    Batch-resize, convert formats, strip metadata, and enforce policies across thousands of files with repeatable shell or PowerShell loops.
+  </Card>
+  <Card title="Photographers" icon="camera">
+    Automate resizing, watermarking, and format exports from the same commands every time — no Lightroom session required for bulk output.
+  </Card>
+</CardGroup>
 
-**Batch-process photos without a GUI.** Resize entire folders with `mogrify` or a shell loop, strip EXIF metadata for privacy, apply consistent watermarks, or convert between color profiles across thousands of files.
+## Use cases
 
-**Validate and constrain user uploads.** Enforce dimensions, reject unsupported formats, generate previews, and normalize images on servers that have no desktop environment.
+Each example is a single command you can copy; paths are placeholders.
+
+### Square thumbnails from mixed aspect ratios
+
+```bash
+magick photo.jpg -resize 200x200^ -gravity center -extent 200x200 thumb.jpg
+```
+
+`-resize 200x200^` fills at least 200×200, then `-extent` crops to an exact square from the center.
+
+### Batch convert a folder of JPEGs to WebP
+
+```bash
+mkdir -p web
+magick mogrify -path web -format webp -quality 85 *.jpg
+```
+
+Writes WebP files into `web/` next to each JPEG basename. For subfolders, mixed formats, and `-auto-orient`, see the [batch resize guide](/how-to/batch-resize-and-optimize).
+
+### Quick checks on an upload before you trust it
+
+```bash
+magick identify -verbose upload.png | grep -E 'Geometry|Format'
+```
+
+On **PowerShell**, use `Select-String` instead of `grep`:
+
+```powershell
+magick identify -verbose upload.png | Select-String -Pattern 'Geometry|Format'
+```
 
 ## Run your first command
 
-Convert a JPEG to PNG and resize it to fit within 800x600 pixels, preserving the aspect ratio:
+Convert a JPEG to PNG and resize it to fit inside 800×600 pixels, preserving aspect ratio:
 
 ```bash
 magick photo.jpg -resize 800x600 photo.png
 ```
 
-A 1200x800 input becomes 800x533. ImageMagick fits the image inside the target dimensions without distortion, then writes the result in the format implied by the output extension.
+A 1200×800 input becomes 800×533. ImageMagick fits the image inside the target box without distortion, then picks the output format from the file extension.
 
 Every command follows the same structure: **input**, then **operations** (left to right), then **output**.
 
 ## Find what you need
 
 <CardGroup cols={2}>
-  <Card title="Install and run your first commands" icon="rocket" href="/quickstart">
-    Set up ImageMagick on your platform and verify it works in under five minutes.
+  <Card title="Setting up for the first time?" icon="rocket" href="/quickstart">
+    Install ImageMagick on your OS, confirm `magick --version`, and run your first convert/resize commands in under five minutes.
   </Card>
-  <Card title="Build a reusable image pipeline" icon="graduation-cap" href="/tutorials/build-image-processing-pipeline">
-    Resize, strip metadata, watermark, and convert images step by step, combining them into a single automated workflow.
+  <Card title="Have a folder of images to process?" icon="images" href="/how-to/batch-resize-and-optimize">
+    Batch resize, convert to WebP or JPEG, strip metadata, fix phone rotation, and cap JPEG size for the web.
   </Card>
-  <Card title="Batch resize and optimize for web" icon="images" href="/how-to/batch-resize-and-optimize">
-    Resize a folder of images with format conversion, quality control, and file size constraints.
+  <Card title="Building a multi-step pipeline?" icon="graduation-cap" href="/tutorials/build-image-processing-pipeline">
+    Chain resize, metadata stripping, watermarking, and format conversion into one reusable command and loop.
   </Card>
-  <Card title="Look up geometry syntax" icon="ruler-combined" href="/reference/geometry">
-    Understand what `800x600>`, `50%`, and `WxH!` do when you pass them to resize, crop, extent, and other spatial operations.
+  <Card title="Need the resize/crop language?" icon="ruler-combined" href="/reference/geometry">
+    Look up what `800x600>`, `50%`, `WxH!`, `^`, and offsets mean for `-resize`, `-crop`, and `-extent`.
   </Card>
 </CardGroup>
 
@@ -53,9 +92,9 @@ Every command follows the same structure: **input**, then **operations** (left t
 
 <CardGroup cols={2}>
   <Card title="Troubleshoot common errors" icon="wrench" href="/troubleshooting">
-    Missing delegates, authorization failures, cache limits, wrong colors, and platform-specific issues.
+    Missing delegates, authorization failures, cache limits, wrong colors, and platform-specific shell escaping.
   </Card>
   <Card title="Ask the community" icon="comments" href="https://github.com/ImageMagick/ImageMagick/discussions">
-    Search past questions or post your own on GitHub Discussions.
+    Search past threads or post a new question on GitHub Discussions.
   </Card>
 </CardGroup>

@@ -16,9 +16,43 @@ magick input.jpg -resize '1200x>' -quality 85 output.webp
 
 See [geometry syntax](/reference/geometry) for a full breakdown of the `1200x>` format.
 
-## Batch-convert a flat folder
+## Batch a flat folder with a loop
 
-Use `magick mogrify` to process every JPEG in a folder and write WebP copies to a separate directory:
+An explicit **`for`** loop runs one `magick` command per file. That is easy to read in logs, tweak per file, and extend with checks—many teams prefer it to `mogrify` for production scripts.
+
+Resize every JPEG in `photos/` and write matching WebP files into `web/`:
+
+```bash
+mkdir -p web
+for f in photos/*.jpg; do
+  [[ -e "$f" ]] || continue
+  base=$(basename "$f" .jpg)
+  magick "$f" -resize '1200x>' -quality 85 "web/${base}.webp"
+done
+```
+
+Confirm the outputs look right:
+
+```bash
+magick identify web/*.webp
+```
+
+You should see one line per file, each with **`WEBP`** in the format column and dimensions at or below your resize rule.
+
+Same loop on **Windows PowerShell**:
+
+```powershell
+New-Item -ItemType Directory -Force -Path web | Out-Null
+Get-ChildItem photos\*.jpg | ForEach-Object {
+  $out = "web\$($_.BaseName).webp"
+  magick $_.FullName -resize "1200x>" -quality 85 $out
+}
+Get-ChildItem web\*.webp | ForEach-Object { magick identify $_.FullName }
+```
+
+## Batch a flat folder with mogrify
+
+The same flat-folder job in one command—handy when you already trust every file in the glob:
 
 ```bash
 mkdir -p web
@@ -26,7 +60,7 @@ magick mogrify -resize '1200x>' -quality 85 -path web -format webp photos/*.jpg
 ```
 
 <Info>
-  **Verify on your machine:** `mogrify` behavior can differ slightly by build. After running the command, confirm files appear under `web/` with `.webp` names. CI runs `bash scripts/verify-snippets.sh` against ImageMagick 7 in Docker; see [Snippet verification (CI)](/development#snippet-verification-ci).
+  After `mogrify`, run **`magick identify web/*.webp`** to confirm each output exists and shows the **`WEBP`** format and expected geometry.
 </Info>
 
 ## Batch-convert with subdirectories
@@ -59,6 +93,33 @@ magick mogrify -resize '1200x>' -quality 85 -path web -format webp photos/*.jpg
 </Tabs>
 
 This mirrors the source folder structure under `web/`. A file at `photos/shoes/boot1.jpg` outputs to `web/shoes/boot1.webp`.
+
+## When one file fails mid-batch
+
+`magick mogrify` applies the same operation to every path in the glob. If **one** input is corrupt or unreadable, **mogrify can exit and leave the rest untouched** (behavior depends on version and delegates—always check the terminal message).
+
+**Loops give you finer control.** Log the failure and continue:
+
+```bash
+mkdir -p web
+for f in photos/*.jpg; do
+  [[ -e "$f" ]] || continue
+  base=$(basename "$f" .jpg)
+  if magick "$f" -resize '1200x>' -quality 85 "web/${base}.webp"; then
+    echo "ok  $f"
+  else
+    echo "ERR $f" >&2
+  fi
+done
+```
+
+If you intentionally want “best effort” without branching, `|| true` after `magick` suppresses a non-zero exit for that iteration—use only when you accept skipping failed files silently:
+
+```bash
+magick "$f" -resize '1200x>' -quality 85 "web/${base}.webp" || true
+```
+
+Inspect the exit status of the whole script with `$?` after the loop if you wrap this in automation.
 
 ## Fix rotated phone photos
 
@@ -108,6 +169,8 @@ Height stays at or below 800. Width adjusts. A 2000x3500 portrait becomes 457x80
 
 ### Exact dimensions with center crop
 
+Use this when the **destination must be an exact pixel size** (for example a **1200×800 hero slot**) and **cropping** edges is acceptable. Tall or wide sources are scaled until the box is filled, then overflow is cut off—ideal when the layout fixes width and height and you do not want letterboxing.
+
 Fill the target dimensions and crop overflow from the center:
 
 ```bash
@@ -118,13 +181,15 @@ The output is exactly 1200x800, cropped from the center. See [geometry syntax](/
 
 ### Fit within a box with padding
 
+Use this when the platform needs a **square (or fixed) canvas** but **must not crop** the subject—e.g. marketplace tiles that show the full product with **letterboxing** instead of cutting off limbs or labels. The image is scaled to fit inside the box, then the canvas is padded to the exact size with a background color.
+
 Resize to fit inside 800x800, then pad the remaining space with a background color:
 
 ```bash
 magick input.jpg -resize '800x800>' -gravity center -background white -extent 800x800 output.jpg
 ```
 
-A 4000x3000 landscape becomes an 800x800 image with the photo centered and white bars on top and bottom. Useful for product listings that require square thumbnails.
+A 4000x3000 landscape becomes an 800x800 image with the photo centered and white bars on top and bottom.
 
 ## Next steps
 

@@ -25,18 +25,20 @@ New to ImageMagick? This page takes you from installation to your first working 
     [MacPorts](https://www.macports.org/) (`sudo port install ImageMagick`) is an alternative if you prefer it.
   </Tab>
   <Tab title="Linux">
-    Download an **ImageMagick 7** AppImage from the [GitHub releases](https://github.com/ImageMagick/ImageMagick/releases) page. Pick the asset that matches your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 build on Apple Silicon Linux VMs). Copy the **exact download URL** from the release you want—do not reuse version numbers from older blog posts or docs, because filenames change every release.
+    For a **known ImageMagick 7** CLI on Linux, use the **official AppImage** from [ImageMagick on GitHub Releases](https://github.com/ImageMagick/ImageMagick/releases). Open the release you want, expand **Assets**, and pick the file for your CPU (for example `ImageMagick-*-gcc-x86_64.AppImage` on Intel/AMD, or the arm64 AppImage on ARM).
+
+    **Working example (replace when this version ages out):** the URL below points at a real asset; when you upgrade, copy the new **Download** URL from GitHub for that asset—filenames change every release.
 
     ```bash
-    wget -O magick-appimage "PASTE_RELEASE_ASSET_URL_HERE"
+    wget -O magick-appimage "https://github.com/ImageMagick/ImageMagick/releases/download/7.1.2-21/ImageMagick-7.1.2-21-gcc-x86_64.AppImage"
     chmod +x magick-appimage
     sudo mv magick-appimage /usr/local/bin/magick
     magick --version
     ```
 
-    The AppImage is self-contained (no `apt install` of ImageMagick required for that binary).
+    Always confirm the asset still exists on the [releases page](https://github.com/ImageMagick/ImageMagick/releases); if `wget` returns 404, pick the current `ImageMagick-*-gcc-x86_64.AppImage` link from the latest **7.x** release.
 
-    On Ubuntu 26.04 and later, the `imagemagick` package from `apt` may include version 7. Check with `magick --version` after installing. On Ubuntu 24.04 and earlier, `apt install imagemagick` often installs version 6 only; use a current AppImage or another [official install path](https://imagemagick.org/script/download.php#linux) if you need the `magick` CLI from version 7.
+    Distribution packages (`apt install imagemagick`, and similar) often install **version 6** or ship **7** without the delegates you expect. Treat the AppImage (or the [official Linux download page](https://imagemagick.org/script/download.php#linux)) as the path to a predictable **v7** `magick` binary.
   </Tab>
   <Tab title="Windows">
     Download the installer from the [ImageMagick releases page](https://imagemagick.org/script/download.php#windows). Choose the **Q16** variant (16 bits per channel) for most use cases.
@@ -62,14 +64,34 @@ Run:
 magick --version
 ```
 
-You should see the version number and a list of delegates (the image formats your build supports). The exact list varies by install method. A typical output looks like:
+**What “success” looks like:** the first line must report **ImageMagick 7** (not `6.9.x`). You should also see a **Delegates** line listing codecs compiled into this binary.
+
+Example (yours will differ slightly by version, CPU, and HDRI):
 
 ```
-Version: ImageMagick 7.1.2-21 Q16-HDRI x86_64
+Version: ImageMagick 7.1.2-21 Q16-HDRI x86_64 …
+Copyright: …
+License: …
+Features: …
 Delegates (built-in): bzlib freetype jng jpeg png tiff webp xml zlib
 ```
 
-If a format you need is missing from your delegates list (like `webp` or `heic`), you may need to install additional libraries and rebuild, or switch to a different install method that includes broader delegate support.
+**How to read it**
+
+- **Delegates (built-in):** space-separated names (`jpeg`, `png`, `webp`, `tiff`, …) tell you which formats this build can handle without extra plug-ins. If the format you need never appears here, this binary cannot decode/encode it—you need a different install (another AppImage, Homebrew build, Docker image, or a custom compile with the right libraries).
+- If **`webp`** (or **HEIC**, **AVIF**, etc.) is missing but you need it, switch to a fuller build or follow your OS packager’s docs to add libraries and reinstall ImageMagick.
+
+Spot-check a single format:
+
+```bash
+magick -list format | grep -i webp
+```
+
+You should see at least one line with `WEBP` and read/write flags (`rw*` or `r--` for read-only). On Windows PowerShell, use `magick -list format | Select-String -Pattern webp`.
+
+<Info>
+  **Operators vs. settings (read this once).** Flags fall into two groups. **Operators** (`-resize`, `-crop`, `-rotate`, …) transform the image **at the point they appear** in the command line. **Settings** (`-gravity`, `-quality`, …) change **state for the rest of the command** until you override them—for example `-gravity Center` affects every later spatial operator, and `-quality 80` sets the JPEG/WebP compression used when the output file is written (moving `-quality` earlier vs. later in the command usually does not change the result).
+</Info>
 
 ## Convert between formats
 
@@ -147,10 +169,6 @@ magick input.png -crop 100x100+0+0 +repage -resize 200x200 crop-then-resize.png
 
 The first command shrinks the whole image, then extracts a piece. The second command extracts a piece first, then enlarges that piece. Different order, different output.
 
-<Info>
-  **Settings vs. operators.** ImageMagick flags fall into two categories. Operators like `-resize`, `-crop`, and `-rotate` transform the image immediately at the point they appear in the command. Settings like `-gravity` and `-quality` change persistent state that remains in effect for the rest of the command. `-gravity Center` affects all spatial operators that follow it until you reset it. `-quality 80` sets the compression level used when the output file is written, so its position relative to operators does not change the result.
-</Info>
-
 ## Process multiple files at once
 
 Use `magick mogrify` to apply the same operation to every file matching a pattern:
@@ -170,8 +188,9 @@ magick mogrify -resize 400x300 *.jpg
 
 ## Keep going
 
-You can now install, convert, resize, inspect, and batch-process images. Three paths forward depending on what you need:
+You can now install, convert, resize, inspect, and batch-process images. Paths forward depending on what you need:
 
 - **[Build an image processing pipeline](/tutorials/build-image-processing-pipeline)** walks you through combining resize, metadata stripping, watermarking, and format conversion into a reusable workflow.
 - **[Batch resize and optimize for web](/how-to/batch-resize-and-optimize)** covers real-world batch processing with quality control and file size constraints.
 - **[Geometry syntax reference](/reference/geometry)** explains every modifier (`>`, `<`, `!`, `^`, `#`) you can append to dimension strings.
+- **[Troubleshooting](/troubleshooting)** if install or first commands fail (`magick` not found, missing delegates, policy errors, or shell escaping around `>` in geometry).

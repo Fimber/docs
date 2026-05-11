@@ -12,9 +12,9 @@ By the end, you will have a batch script that processes an entire folder of phot
   This tutorial assumes you have ImageMagick installed and have run basic commands. If you haven't, start with [Getting started](/quickstart).
 </Info>
 
-<Info>
-  **Shell:** Steps 1–5 use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). On **Windows PowerShell**, use the same `magick` commands by typing them on one line (omit the `\` line breaks), or follow the **Step 6** tab for batch loops in PowerShell.
-</Info>
+<Warning>
+  **Shell:** Steps 1–5 use **bash** (Linux, macOS, or [Git for Windows](https://gitforwindows.org/) Git Bash). Line continuations use `\` at the end of each line—**PowerShell treats `\` differently**, so either paste each command as **one long line** (remove the backslashes and extra newlines) or use **Step 6** for a PowerShell-native loop.
+</Warning>
 
 ## Set up your working directory
 
@@ -52,7 +52,13 @@ magick originals/product1.jpg -resize '800x800>' resized.jpg
 magick identify resized.jpg
 ```
 
-The `identify` output shows your 2400x1800 image is now 800x600. The resize step uses a trailing greater-than on the geometry so ImageMagick only shrinks: fit inside 800×800, keep aspect ratio, and never upscale a small source. Try the same resize on the other two images to see how portrait and square inputs behave.
+Example `identify` line (dimensions in field 3; yours may differ slightly by build):
+
+```
+resized.jpg JPEG 800x600 800x600+0+0 8-bit sRGB 2.34567e+04B 0.000u 0:00.000
+```
+
+The third column **`800x600`** confirms your 2400×1800 source was shrunk to fit inside 800×800 (aspect ratio preserved). The resize step uses a trailing greater-than on the geometry so ImageMagick only shrinks: fit inside 800×800, keep aspect ratio, and never upscale a small source. Try the same resize on the other two images to see how portrait and square inputs behave.
 
 The [geometry syntax reference](/reference/geometry) covers every modifier in detail.
 
@@ -65,7 +71,7 @@ magick originals/product1.jpg -strip stripped.jpg
 magick identify stripped.jpg
 ```
 
-The output file is the same image with all metadata removed. Confirm the file exists and check its dimensions before moving on.
+You should still see the same **geometry** as the source (e.g. `800x600` after the earlier resize). Metadata is gone from the file; use `magick identify -verbose stripped.jpg | head` if you want to confirm profile/EXIF fields disappeared.
 
 ## Step 3: Add a watermark
 
@@ -77,10 +83,19 @@ Watermarking has two parts: creating the watermark image and compositing it onto
 magick -size 300x60 xc:none \
   -fill white -pointsize 28 -gravity center \
   -annotate 0 "SAMPLE" \
-  PNG32:watermark.png
+  PNG:watermark.png
 ```
 
-You now have a `watermark.png` file with the word "SAMPLE" on a transparent background. The `PNG32:` prefix ensures the transparency is preserved in the output.
+You now have a `watermark.png` with **SAMPLE** on a transparent canvas. **`PNG:`** writes a normal PNG; because the image still has an alpha channel from `xc:none`, transparency is kept. Use **`PNG32:watermark.png`** instead if you ever need to **force** a 32-bit RGBA file on disk (some older tools expect that explicit depth).
+
+**Tweak the label:** change the string in quotes, or adjust color, size, and font:
+
+```bash
+magick -size 360x80 xc:none -fill "#c62828" -pointsize 36 -font "Helvetica-Bold" \
+  -gravity center -annotate 0 "DRAFT" PNG:watermark-red.png
+```
+
+Use your own font name (see `magick -list font`) and point size so the watermark fits your product frame.
 
 **Apply the watermark.** Composite it onto a product photo, positioned in the bottom-right corner:
 
@@ -89,6 +104,12 @@ magick originals/product1.jpg watermark.png \
   -gravity SouthEast -geometry +20+20 \
   -composite watermarked.jpg
 magick identify watermarked.jpg
+```
+
+Example (geometry should match your resized photo; JPEG because this step still writes `.jpg`):
+
+```
+watermarked.jpg JPEG 800x600 800x600+0+0 8-bit sRGB …
 ```
 
 The `-gravity SouthEast -geometry +20+20` places the watermark 20 pixels from the bottom-right edges.
@@ -102,11 +123,17 @@ magick originals/product1.jpg -quality 85 product1.webp
 magick identify product1.webp
 ```
 
+Example (this step reads the **original** full-size JPEG, so dimensions stay large until Step 5):
+
+```
+product1.webp WEBP 2400x1800 2400x1800+0+0 8-bit sRGB …
+```
+
 ImageMagick picks the output format from the `.webp` extension. `-quality 85` is a good default for product photos.
 
 ## Step 5: Combine everything into one command
 
-Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call:
+Each step you have learned so far is an operation that ImageMagick processes left to right. You can combine them all into a single `magick` call. (In bash, `\` must be the **last** character on a line—inline `#` comments cannot sit after the backslash, so the table below maps each line to its job.)
 
 ```bash
 magick originals/product1.jpg \
@@ -119,16 +146,16 @@ magick originals/product1.jpg \
   processed/product1.webp
 ```
 
-Here is what happens at each stage of the command:
-
-1. `originals/product1.jpg` loads the input image.
-2. `-resize '800x800>'` shrinks it to fit within 800x800, preserving aspect ratio.
-3. `-strip` removes all metadata.
-4. `watermark.png` loads the watermark as a second image.
-5. `-gravity SouthEast -geometry +20+20` positions the watermark at the bottom-right with a 20-pixel margin.
-6. `-composite` merges the watermark onto the resized photo.
-7. `-quality 85` sets the WebP compression level.
-8. `processed/product1.webp` writes the final output.
+| # | Line | What it does |
+|---|------|----------------|
+| 1 | `magick originals/product1.jpg \` | Load the product JPEG. |
+| 2 | `-resize '800x800>' \` | Shrink to fit inside 800×800 without upscaling. |
+| 3 | `-strip \` | Remove metadata and color profiles. |
+| 4 | `watermark.png \` | Load the watermark as a second image. |
+| 5 | `-gravity SouthEast -geometry +20+20 \` | Anchor the overlay bottom-right with a 20px margin. |
+| 6 | `-composite \` | Flatten the watermark onto the main image. |
+| 7 | `-quality 85 \` | Set lossy quality for the WebP encoder. |
+| 8 | `processed/product1.webp` | Write the final WebP. |
 
 Verify the result:
 
@@ -136,7 +163,13 @@ Verify the result:
 magick identify processed/product1.webp
 ```
 
-One command takes a raw product photo and outputs a web-ready, watermarked, metadata-free WebP image.
+Example line:
+
+```
+processed/product1.webp WEBP 800x600 800x600+0+0 8-bit sRGB …
+```
+
+The **WEBP** token and **`800x600`** (or your aspect-correct size) confirm the pipeline wrote a WebP at the expected dimensions. One command turns a raw product photo into a web-ready, watermarked, metadata-free WebP.
 
 ## Step 6: Batch-process a folder
 
@@ -197,7 +230,9 @@ Keep the `watermark.png`, `originals/`, and `processed/` folders. The watermark 
 
 ## What you learned
 
-This tutorial covered six ImageMagick concepts through a single real-world task:
+In plain English: you took large, inconsistent JPEGs, shrank them to a shared maximum size, removed sensitive metadata, stamped a reusable watermark in the corner, and exported web-sized **WebP** files—first as separate commands, then as **one** `magick` invocation you can drop into a shell loop.
+
+This tutorial covered six ImageMagick concepts through that same task:
 
 - **Resize with only-shrink geometry** (`-resize` plus `800x800>` in quotes) so large images fit inside 800×800 without upscaling smaller ones.
 - **Metadata stripping** (`-strip`) to remove EXIF data including GPS coordinates and camera info.

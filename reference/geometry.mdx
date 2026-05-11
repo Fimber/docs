@@ -8,15 +8,17 @@ Geometry is a string format that specifies dimensions, offsets, and resize behav
 
 ## Base syntax
 
-| Format | Meaning | Example on 1600x1200 |
-|--------|---------|----------------------|
-| `WxH` | Fit within W by H, preserve aspect ratio | `800x400` → 533x400 |
-| `W` | Set width, height adjusts proportionally | `800` → 800x600 |
-| `xH` | Set height, width adjusts proportionally | `x600` → 800x600 |
-| `W%` | Scale both dimensions by percentage | `50%` → 800x600 |
-| `W%xH%` | Scale width and height by different percentages | `50%x25%` → 800x300 |
-| `WxH+X+Y` | Dimensions with offset (used by `-crop`) | `400x300+100+50` → 400x300 region starting at pixel 100,50 |
-| `A@` | Resize to approximate pixel area A | `640000@` → 924x693 (area ≈ 640,000) |
+Unless noted, examples assume a **1600×1200** source (4∶3 aspect ratio). For “fit inside” sizes, ImageMagick uses **scale = min(W/w, H/h)** so neither output dimension exceeds the box.
+
+| Format | Meaning | Example (1600×1200 source) |
+|--------|---------|----------------------------|
+| `WxH` | Fit inside **W×H**, keep aspect ratio (scale = min of width/height ratios) | `800x400` → **533×400** — height binds first because `400÷1200` is a smaller scale than `800÷1600`; **not** 800×600 (height would exceed 400). |
+| `W` | Set width **W**, height follows aspect ratio | `800` → **800×600** |
+| `xH` | Set height **H**, width follows aspect ratio | `x600` → **800×600** |
+| `W%` | Scale **both** width and height by the same percentage | `50%` → **800×600** |
+| `W%xH%` | Scale width and height **independently** (aspect ratio usually changes) | `50%x25%` → **800×300** (half width, quarter height—common mistake is expecting 50% on both axes; use plain `50%` for uniform shrink). |
+| `WxH+X+Y` | Width×height plus offset (typical with `-crop`) | `400x300+100+50` → 400×300 region with top-left of the crop at **pixel (100, 50)** |
+| `A@` | Resize to approximate total pixel area **A** | `640000@` → **924×693** (area ≈ 640,332) |
 
 <Info>
   Geometry dimensions are in pixels. ImageMagick does not factor in DPI or print resolution when interpreting geometry strings. An image at 300 DPI and an image at 72 DPI with the same pixel dimensions receive the same resize result.
@@ -25,6 +27,10 @@ Geometry is a string format that specifies dimensions, offsets, and resize behav
 ## Resize modifier flags
 
 Modifier flags are appended to the end of a geometry string. They change how ImageMagick handles aspect ratio and sizing constraints.
+
+### Independent percentages on both axes (`W%xH%`)
+
+Strings like **`50%x25%`** scale width and height **by different percentages**, so the aspect ratio **changes** (unlike a single `50%`, which scales both axes together). See the **`W%xH%`** row in the [base syntax](#base-syntax) table—this trips people who expect `50%x25%` to mean “50% overall.”
 
 All examples below use a **1600x1200** input image and a target of **800x400**.
 
@@ -80,15 +86,15 @@ Resizes the image only if it is smaller than the target. Larger images stay unch
 magick input.jpg -resize '800x400^' output.jpg
 ```
 
-Scales the image to completely fill the target area. One dimension will match; the other may exceed the target. Output: **800x600** (width matches 800, height overflows to 600).
+**`^` means “cover” the box**, not “fit inside.” ImageMagick scales until **both** dimensions are at least the target (`max(W/w, H/h)`). For 1600×1200 into an **800×400** box, the width hits 800 first, producing **800×600**—the image is **150px taller than the 400px target**. That overflow is expected; you still need a **crop** or **extent** step if the deliverable must be exactly 800×400.
 
-This is typically paired with `-gravity center -extent` to crop the overflow:
+This is typically paired with `-gravity center -extent` (or `-crop`) to trim the extra:
 
 ```bash
 magick input.jpg -resize '800x400^' -gravity center -extent 800x400 output.jpg
 ```
 
-Output: **800x400** (filled and cropped from center).
+Final output: **800×400** (scaled to cover, then canvas cropped from the center).
 
 ## Offset syntax
 
@@ -112,13 +118,15 @@ This shifts the crop region 50 pixels left and 25 pixels up from the default ori
 
 When `-gravity` is set, crop offsets are measured from the gravity anchor point instead of the top-left corner.
 
-| Gravity | Offset origin | `-crop 400x400+0+0` on 800x800 |
-|---------|--------------|-------------------------------|
-| `NorthWest` (default) | Top-left corner | Top-left quadrant |
-| `NorthEast` | Top-right corner | Top-right quadrant |
-| `Center` | Center of image | Center region |
-| `SouthEast` | Bottom-right corner | Bottom-right quadrant |
-| `South` | Bottom-center edge | Bottom-center region |
+| Gravity | Anchor for `+X+Y` (on an **800×800** image, 0-based pixels) | `-crop 400x400+0+0` result |
+|---------|------------------------------------------------------------------|---------------------------|
+| `NorthWest` (default) | Top-left corner **(0, 0)** | Top-left 400×400 block |
+| `NorthEast` | Top-right corner **(799, 0)** — column `width−1`, row `0` | Top-right 400×400 block |
+| `Center` | Image center **(400, 400)** — half of 800 in each axis | Centered 400×400 |
+| `SouthEast` | Bottom-right **(799, 799)** — column and row `size−1` | Bottom-right 400×400 block |
+| `South` | Bottom edge center **(400, 799)** — middle column, bottom row | Bottom-centered 400×400 strip |
+
+Offsets add to the anchor in the direction ImageMagick defines for that gravity (see the [official geometry](https://imagemagick.org/script/command-line-processing.php#geometry) page for edge cases).
 
 `-gravity` persists for all subsequent spatial operations until explicitly reset. To reset it:
 
@@ -132,12 +140,12 @@ The first crop uses Center gravity. The second crop uses the default top-left or
 
 **Resize operations** (all preserve aspect ratio by default, all accept modifier flags):
 
-| Option | Behavior |
-|--------|----------|
-| `-resize` | High-quality resize with filtering |
-| `-thumbnail` | Same as `-resize` but also strips metadata and color profiles |
-| `-scale` | Simplified resize (no pixel filtering, faster) |
-| `-sample` | Nearest-neighbor resize (no interpolation, fastest, may alias) |
+| Option | Behavior | Use when |
+|--------|----------|----------|
+| `-resize` | High-quality resize with filtering | Default: best visual quality for photos and general output. |
+| `-thumbnail` | Same geometry as `-resize`, plus **strips metadata and profiles** | Web assets and thumbnails where smaller files and privacy matter. |
+| `-scale` | Fast resize **without** resize filters (pixel averaging) | Speed over quality; large downscales where a softer `-resize` is unnecessary. |
+| `-sample` | **Nearest-neighbor** only (no interpolation) | Pixel art, crisp UI captures, masks—avoid on photos (stair‑edges / aliasing). |
 
 **Crop and extent operations** (use `WxH+X+Y` offset syntax):
 
@@ -150,7 +158,7 @@ The first crop uses Center gravity. The second crop uses the default top-left or
 
 **`x600` vs `0x600`.** These are different. `x600` omits the width, so ImageMagick calculates it proportionally from the height. `0x600` specifies a width of zero, which produces a 1x1 pixel output. Always omit the dimension rather than setting it to zero.
 
-**Percentage with different axes.** `50%` scales both width and height by 50%. `50%x25%` scales width by 50% and height by 25% independently, which changes the aspect ratio.
+**Two-axis percentages (`50%x25%`).** Covered in the base table above: width and height scale **independently**, so the picture stretches unless both percentages match.
 
 **Decimal percentages.** Values like `33.3%` are valid. ImageMagick rounds the result to the nearest whole pixel. A 1600x1200 image at `33.3%` becomes 533x400.
 

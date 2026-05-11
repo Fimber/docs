@@ -4,9 +4,68 @@ sidebarTitle: Troubleshoot errors
 description: Solutions for common ImageMagick errors and unexpected output.
 ---
 
+## Run these first (diagnostics)
+
+Run a few commands **before** you dig into a specific error—they show version, delegates, policies, and what ImageMagick thinks about your file.
+
+<Tabs>
+  <Tab title="Linux / macOS (bash)">
+    ```bash
+    # Version + built-in delegates (formats this binary can handle)
+    magick --version
+
+    # One format, with read/write flags
+    magick -list format | grep -i webp
+
+    # Memory / disk / thread limits
+    magick -list resource
+
+    # Which policy.xml files are loaded and coder rules
+    magick -list policy
+
+    # One file decoded as ImageMagick sees it
+    magick identify -verbose path/to/your.jpg
+
+    # True container type from bytes (optional)
+    file path/to/your.jpg
+    ```
+  </Tab>
+  <Tab title="Windows (PowerShell)">
+    ```powershell
+    magick --version
+
+    magick -list format | Select-String -Pattern webp -CaseSensitive:$false
+
+    magick -list resource
+
+    magick -list policy
+
+    magick identify -verbose path\to\your.jpg
+    ```
+
+    There is no built-in `file` command; `magick identify` already reports the detected format.
+  </Tab>
+</Tabs>
+
 ## Errors
 
 <AccordionGroup>
+  <Accordion title="unable to open image … No such file or directory">
+    **Error:**
+
+    ```
+    magick: unable to open image 'input.jpg': No such file or directory
+    ```
+
+    **Cause:** ImageMagick cannot read the path you passed—wrong **working directory**, a **typo**, or a path that contains **spaces** without quoting.
+
+    **Fix:**
+
+    - Print where you are: `pwd` (Linux/macOS) or `Get-Location` (PowerShell). Paths like `input.jpg` are **relative** to that directory.
+    - Prefer explicit paths: `magick ./photos/input.jpg …` or `magick "C:\Users\you\Pictures\My Photo.jpg" …` (quotes when the path or filename has spaces).
+    - On Windows, check drive letters and backslashes; inside WSL, `/mnt/c/...` is not the same path as `C:\...` from Windows Explorer.
+  </Accordion>
+
   <Accordion title="magick: not found / 'magick' is not recognized">
     **Cause:** ImageMagick 7 is not installed, or the `magick` binary is not on your system PATH.
 
@@ -133,38 +192,48 @@ description: Solutions for common ImageMagick errors and unexpected output.
     magick: not authorized 'input.pdf'
     ```
 
-    **Cause:** The security policy (`policy.xml`) blocks the file type. PDF, EPS, PS, and SVG are commonly restricted because they can execute code through delegates like Ghostscript.
+    **Cause:** A **policy.xml** rule blocks that coder (PDF, EPS, PS, SVG, etc.). Those formats often invoke Ghostscript or other delegates that have had serious security issues.
 
-    **Fix:** Find which policy files apply, then edit the one that sets the restriction (often a `policy.xml` under ImageMagick’s config path):
+    <Warning>
+      **Do not relax policy for untrusted files.** Changing `rights="none"` to `read|write` lets ImageMagick decode vectors and PostScript that can be malicious. Only do this on machines that **never** process uploads or downloads you do not fully trust, and keep ImageMagick and Ghostscript patched.
+    </Warning>
+
+    **Fix — step 1:** See which policy files ImageMagick actually loaded (paths differ by OS and packager):
 
     <Tabs>
       <Tab title="Linux / macOS">
         ```bash
-        magick -list policy | head -25
+        magick -list policy | head -40
         ```
       </Tab>
       <Tab title="Windows (PowerShell)">
         ```powershell
-        magick -list policy | Select-Object -First 25
+        magick -list policy | Select-Object -First 40
         ```
       </Tab>
     </Tabs>
 
-    Look for a line restricting the relevant coder:
+    **Fix — step 2:** Open the file that contains the `<policy domain="coder" … pattern="PDF" />` line (often named `policy.xml`). Typical locations—**always confirm with the output above**:
+
+    | Install | Where to look |
+    |---------|----------------|
+    | **Homebrew (macOS)** | `$(brew --prefix)/etc/ImageMagick-7/` (Apple Silicon: often `/opt/homebrew/etc/ImageMagick-7/`; Intel: often `/usr/local/etc/ImageMagick-7/`). Run `brew --prefix imagemagick` if unsure. |
+    | **Ubuntu / Debian (`apt`)** | `/etc/ImageMagick-7/policy.xml` or `/etc/ImageMagick-6/policy.xml` (depends on package). `sudo find /etc -name policy.xml 2>/dev/null` lists candidates. |
+    | **Windows installer** | Under the ImageMagick program folder, e.g. `C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\policy.xml` (folder name matches your version). |
+
+    **Fix — step 3:** Find the restrictive line and change rights only if you accept the risk above:
 
     ```xml
     <policy domain="coder" rights="none" pattern="PDF" />
     ```
 
-    Change `rights="none"` to `rights="read|write"` to allow the format:
+    to:
 
     ```xml
     <policy domain="coder" rights="read|write" pattern="PDF" />
     ```
 
-    <Warning>
-      These formats are restricted by default for security reasons. PDF and PostScript processing relies on Ghostscript, which has had serious vulnerabilities. Only relax these policies on machines that do not process untrusted input files.
-    </Warning>
+    Save the file, then run `magick -list policy` again to confirm the rule changed. Some installs ship **multiple** fragments; edit the one that still shows `none` for your coder.
   </Accordion>
 
   <Accordion title="insufficient image data / improper image header">
@@ -246,6 +315,23 @@ description: Solutions for common ImageMagick errors and unexpected output.
     `-auto-orient` reads the EXIF orientation flag, physically rotates the pixels to match, and removes the flag.
   </Accordion>
 
+  <Accordion title=".webp file looks wrong or viewers say it is JPEG">
+    **Symptom:** You wrote `output.webp`, nothing errored, but the image looks like JPEG compression or tools report **JFIF** / **JPEG** inside the file.
+
+    **Cause:** Some builds lack a **WebP encode delegate**. ImageMagick may still write a file with a `.webp` extension while encoding with another codec—**the extension can lie**.
+
+    **Fix:**
+
+    - Run `magick --version` and read **Delegates (built-in):** — you should see `webp` if WebP encode is native to this binary.
+    - Run `magick identify -verbose output.webp | Select-String -Pattern 'format|mime'` (or `grep` on Linux/macOS). If the reported format is **JPEG** despite the `.webp` name, install a build with WebP support or write to **`output.jpg`** until you upgrade.
+
+    ```bash
+    magick -list format | grep -i webp
+    ```
+
+    You want a line with **`WEBP`** and **`rw`** (or at least read) for the direction you need.
+  </Accordion>
+
   <Accordion title="Output file is larger than the input">
     **Cause:** Converting between formats can increase file size. PNG is lossless and often larger than JPEG for photographic images. Resizing upward increases file size. Converting from a lossy format to another lossy format at high quality can also increase size.
 
@@ -324,48 +410,5 @@ description: Solutions for common ImageMagick errors and unexpected output.
     ```
   </Accordion>
 </AccordionGroup>
-
-## Diagnostic commands
-
-Quick reference for commands that help diagnose issues:
-
-<Tabs>
-  <Tab title="Linux / macOS (bash)">
-    ```bash
-    # Check ImageMagick version and delegates
-    magick --version
-
-    # Check if a format is supported (read/write flags in the listing)
-    magick -list format | grep -i webp
-
-    # Resource limits (memory, disk, threads)
-    magick -list resource
-
-    # Security policy sources and rules
-    magick -list policy
-
-    # Deep inspection of one file
-    magick identify -verbose input.jpg
-
-    # Real container format from the file header (optional)
-    file input.jpg
-    ```
-  </Tab>
-  <Tab title="Windows (PowerShell)">
-    ```powershell
-    magick --version
-
-    magick -list format | Select-String -Pattern webp -CaseSensitive:$false
-
-    magick -list resource
-
-    magick -list policy
-
-    magick identify -verbose input.jpg
-    ```
-
-    There is no built-in `file` command; `magick identify` already reports the detected format.
-  </Tab>
-</Tabs>
 
 If your issue is resolved, pick up where you left off: [tutorial](/tutorials/build-image-processing-pipeline), [batch resize guide](/how-to/batch-resize-and-optimize), or [geometry reference](/reference/geometry). For problems not covered here, search the [GitHub Discussions](https://github.com/ImageMagick/ImageMagick/discussions).
