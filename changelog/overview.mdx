@@ -1,0 +1,16 @@
+---
+title: Changelog
+sidebarTitle: Overview
+description: Weekly updates to ImageMagick, including new features, improvements, and bug fixes.
+---
+
+Track what's new in ImageMagick. Each post summarizes the changes that shipped that week and what they mean for you.
+
+<Update label="May 15, 2026" description="Week of May 11 to May 15, 2026">
+
+## Bug fixes
+
+- **HEIF: improved compatibility with older libheif versions.** The `ignore_sequence_editlist` decoder option is now used only when building against libheif 1.21 or newer, restoring builds and runtime behavior for users on earlier libheif releases. See the [Common options reference](/reference/common-options) for supported options.
+- **Stability fix in `GetImageFeatures` error handling.** Resolved an unsound free of uninitialized pointers along an error path in the texture-features routine. Callers that invoke feature extraction (for example, `magick identify -features`) are no longer at risk of crashes or undefined behavior when an internal allocation fails. Learn more in the [Common options reference](/reference/common-options).
+
+</Update>

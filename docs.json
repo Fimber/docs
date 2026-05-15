@@ -45,6 +45,15 @@
             "pages": ["troubleshooting", "development"]
           }
         ]
+      },
+      {
+        "tab": "Changelog",
+        "groups": [
+          {
+            "group": "Changelog",
+            "pages": ["changelog/overview"]
+          }
+        ]
       }
     ]
   },
